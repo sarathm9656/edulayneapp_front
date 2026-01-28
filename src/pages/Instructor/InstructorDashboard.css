@@ -1,0 +1,101 @@
+.instructor-dashboard {
+    --PrimaryColor: #2563EB;
+    --SecondaryColor: #F59E0B;
+    --HeadingColor: #1f2937;
+    --TextColor: #4b5563;
+}
+
+/* Ensure these variables are applied to children */
+.instructor-dashboard button,
+.instructor-dashboard h1,
+.instructor-dashboard h2,
+.instructor-dashboard h3,
+.instructor-dashboard h4,
+.instructor-dashboard h5,
+.instructor-dashboard h6,
+.instructor-dashboard p,
+.instructor-dashboard a {
+    /* These elements usually inherit or use the variables, but let's be safe */
+}
+
+/* Refresh the welcome section gradient if needed */
+.instructor-dashboard .welcometext-con {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.8) 100%);
+    border-left: 5px solid var(--PrimaryColor);
+}
+
+.instructor-dashboard .welcometext-div {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Cards styling refresh */
+.instructor-dashboard .counts-item {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.instructor-dashboard .counts-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: var(--PrimaryColor);
+}
+
+.instructor-dashboard .counts-item h3 {
+    color: var(--PrimaryColor);
+    font-weight: 700;
+}
+
+.instructor-dashboard .counts-item i {
+    color: var(--SecondaryColor);
+}
+
+.instructor-dashboard .courseitem {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-bottom: 4px solid var(--PrimaryColor);
+}
+
+.instructor-dashboard .courseitem:hover {
+    background: #f0f9ff;
+}
+
+/* Improve buttons */
+.instructor-dashboard .getstarted-btn {
+    background-color: var(--PrimaryColor);
+    color: white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+
+.instructor-dashboard .getstarted-btn:hover {
+    background-color: var(--SecondaryColor);
+}
+
+/* Learners & Instructors section */
+.instructor-dashboard .learners-itemdiv {
+    border-radius: 12px;
+    border: none;
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.instructor-dashboard .learnersbg {
+    border-left: 5px solid #10b981;
+    /* Green accent */
+}
+
+.instructor-dashboard .instructorsbg {
+    border-left: 5px solid #8b5cf6;
+    /* Purple accent */
+}
+
+.instructor-dashboard .gcalandarbg {
+    border-left: 5px solid #ef4444;
+    /* Red accent */
+}
