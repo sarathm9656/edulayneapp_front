@@ -835,8 +835,8 @@ const TenantBatches = () => {
 
     setEditForm({
       batch_name: batch.batch_name,
-      course_id: batch.course_id._id || batch.course_id,
-      instructor_id: batch.instructor_id._id || batch.instructor_id,
+      course_id: batch.course_id?._id || batch.course_id || "",
+      instructor_id: batch.instructor_id?._id || batch.instructor_id || "",
       instructor_ids: instructorIds,
       start_date: new Date(batch.start_date).toISOString().split("T")[0],
       end_date: new Date(batch.end_date).toISOString().split("T")[0],

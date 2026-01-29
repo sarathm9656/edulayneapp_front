@@ -25,8 +25,14 @@ const CourseDetails = () => {
   useEffect(() => {
     console.log("id", id);
     dispatch(fetchSingleCourse(id));
-    fetchTheModulesAssociatedWithTheCourse();
+    // fetchTheModulesAssociatedWithTheCourse();
   }, [dispatch, id]);
+
+  useEffect(() => {
+    if (singleCourse) {
+      setCourseData(singleCourse);
+    }
+  }, [singleCourse]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -38,6 +44,7 @@ const CourseDetails = () => {
             <img
               src={courseData?.image}
               alt={courseData?.course_title}
+              onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/800x400?text=Course+Image"; }}
               className="w-full h-full object-cover rounded-lg"
             />
           </div>

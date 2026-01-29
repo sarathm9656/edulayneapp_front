@@ -93,9 +93,9 @@ const StudentViewBatch = () => {
               clearInterval(timer);
               try {
                 await attendanceService.leaveSession({
-                  student_id: user.user._id,
+                  student_id: user.user?.user_id?._id || user.user?.user_id || user.user?._id,
                   course_id: batch.course_id?._id || batch.course_id,
-                  batch_id: batch._id || batchId
+                  batch_id: batch?.batch_id || batchId
                 });
                 toast.info("Session ended. Attendance duration recorded.");
               } catch (err) {
@@ -123,7 +123,7 @@ const StudentViewBatch = () => {
 
     if (isLive || batch.meeting_link) {
       return (
-        <button onClick={() => handleJoinClass(batch._id)} className="btn btn-sm btn-danger text-white rounded-pill px-3 fw-bold animate-pulse border-0">
+        <button onClick={() => handleJoinClass(batch.batch_id)} className="btn btn-sm btn-danger text-white rounded-pill px-3 fw-bold animate-pulse border-0">
           <FaVideo className="me-2" /> Join Class
         </button>
       );

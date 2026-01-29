@@ -33,7 +33,7 @@ function renderLessonContent(lesson) {
 
       return videoId ? (
         <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
+          src={`https://www.youtube.com/embed/${videoId}?modestbranding=1&rel=0&showinfo=0`}
           title="YouTube video"
           allowFullScreen
           className="w-100 h-100 border-0"

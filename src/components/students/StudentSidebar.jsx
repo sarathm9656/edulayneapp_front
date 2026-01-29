@@ -114,11 +114,11 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
       <aside className={`modern-sidebar ${isOpen ? "active" : ""}`}>
         {/* Header / Logo */}
         <div className="modern-logo" style={{ width: "100%", justifyContent: "center", marginBottom: "20px" }}>
-          <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "40px", width: "auto" }} />
+          <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "100px", width: "auto", objectFit: "contain" }} />
         </div>
-
+{/* 
         {/* Search */}
-        <div className="modern-search-container mb-4" style={{ width: "100%", maxWidth: "100%" }}>
+        {/* <div className="modern-search-container mb-4" style={{ width: "100%", maxWidth: "100%" }}>
           <i className="fa-solid fa-magnifying-glass modern-search-icon" style={{ left: "12px", fontSize: "14px" }}></i>
           <input
             ref={searchInputRef}
@@ -148,7 +148,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
               <i className="fa-solid fa-times"></i>
             </button>
           )}
-        </div>
+        </div>  */}
 
         {/* Menu Items */}
         <nav className="modern-nav">

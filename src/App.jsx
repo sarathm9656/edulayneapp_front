@@ -47,6 +47,7 @@ import ViewCourseDetailsInstructor from "./pages/Instructor/ViewCourseDetailsIns
 import ListTenantCourses from "./pages/student/ListTenantCourses";
 import InstructorBatches from "./pages/Instructor/InstructorBatches";
 import InstructorProfile from "./pages/Instructor/InstructorProfile";
+import InstructorCurriculumPage from "./pages/Instructor/InstructorCurriculumPage";
 import ViewCourse from "./pages/student/ViewCourse";
 import Landing from "./Landing";
 // import InstructorMeetings from "./pages/Instructor/InstructorMeetings";
@@ -67,6 +68,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import AttendanceDashboard from "./pages/Tenent/attendance/AttendanceDashboard";
 import CourseBatchAttendance from "./pages/Tenent/attendance/CourseBatchAttendance";
 import InstructorEarnings from "./pages/Instructor/InstructorEarnings";
+import TenantFinanceDashboard from "./pages/Tenent/finance/TenantFinanceDashboard";
+import InstructorFinanceDashboard from "./pages/Instructor/finance/InstructorFinanceDashboard";
 
 function App() {
   return (
@@ -123,7 +126,7 @@ function App() {
           <Route path="Batches" element={<TenantBatches />} />
           <Route path="profile" element={<TenantProfile />} />
           {/* payment details showing page to the instructor */}
-          <Route path="payroll" element={<TenantPayroll />} />
+          <Route path="payroll" element={<TenantFinanceDashboard />} />
           <Route
             path="instructor/:instructorId"
             element={<InstructorDetailsPage />}
@@ -197,7 +200,8 @@ function App() {
           <Route path="batches" element={<InstructorBatches />} />
 
           <Route path="profile" element={<InstructorProfile />} />
-          <Route path="earnings" element={<InstructorEarnings />} />
+          <Route path="earnings" element={<InstructorFinanceDashboard />} />
+          <Route path="curriculum/:id" element={<InstructorCurriculumPage />} />
         </Route>
       </Routes>
     </Router>

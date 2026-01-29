@@ -20,59 +20,56 @@ const InstructorSidebar = ({ isOpen, toggleMenu }) => {
   };
 
   const menuItems = [
-    {
-      label: "Dashboard",
-      icon: <i className="fa-solid fa-gauge-high"></i>,
-      path: "/instructor",
-    },
-    {
-      label: "My Courses",
-      icon: <i className="fa-solid fa-graduation-cap"></i>,
-      path: "/instructor/instructor_courses",
-    },
-    {
-      label: "Batches",
-      icon: <i className="fa-solid fa-layer-group"></i>,
-      path: "/instructor/batches",
-    },
-    {
-      label: "Earnings",
-      icon: <i className="fa-solid fa-indian-rupee-sign"></i>,
-      path: "/instructor/earnings",
-    },
+    { label: "Dashboard", path: "/instructor", icon: "fa-gauge-high" },
+    { label: "My Courses", path: "/instructor/instructor_courses", icon: "fa-graduation-cap" },
+    { label: "Batches", path: "/instructor/batches", icon: "fa-layer-group" },
+    { label: "Earnings", path: "/instructor/earnings", icon: "fa-indian-rupee-sign" },
   ];
 
   return (
     <>
+      {/* Overlay (mobile only) */}
       <div
         className={`sidebar-overlay ${isOpen ? "active" : ""}`}
         onClick={toggleMenu}
-      ></div>
+      />
+
       <aside className={`modern-sidebar ${isOpen ? "active" : ""}`}>
-        <div className="modern-logo" style={{ width: "100%", justifyContent: "center" }}>
-          <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "40px", width: "auto" }} />
+        {/* Logo */}
+        <div className="modern-logo d-flex justify-content-center align-items-center">
+          <img
+            src="/img/edulayne-full-logo.png"
+            alt="Edulayne"
+            style={{ height: "80px" }}
+          />
         </div>
 
+        {/* Menu */}
         <nav className="modern-nav">
           {menuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`modern-nav-item ${location.pathname === item.path ? "active" : ""
-                }`}
+              className={`modern-nav-item ${
+                location.pathname === item.path ? "active" : ""
+              }`}
               onClick={() => window.innerWidth < 992 && toggleMenu()}
             >
-              {item.icon}
+              <i className={`fa-solid ${item.icon}`}></i>
               <span>{item.label}</span>
             </Link>
           ))}
         </nav>
 
-        <div className="mt-auto">
-          <a onClick={handleLogout} className="modern-logout">
+        {/* Logout */}
+        <div className="mt-auto px-3 pb-3">
+          <button
+            onClick={handleLogout}
+            className="modern-logout w-100"
+          >
             <i className="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
-          </a>
+          </button>
         </div>
       </aside>
     </>
