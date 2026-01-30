@@ -69,8 +69,8 @@ const ModernTenantLayout = () => {
             {/* Sidebar */}
             <aside className={`modern-sidebar ${isSidebarActive ? "active" : ""}`}>
                 <div className="modern-logo">
-                    <img src="/img/edulayne-full-logo.png" alt="EDULAYN" />
-                    
+                    <img src="/img/edulayne-full-logo.png" alt="EDULAYN" className="tenant-logo" style={{ width: "130%", height: "130%", objectFit: "cover", marginLeft: "-10%" }} />
+
                 </div>
 
                 <nav className="modern-nav">

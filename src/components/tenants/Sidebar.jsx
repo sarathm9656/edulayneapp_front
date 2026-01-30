@@ -128,7 +128,7 @@ const TenantSidebar = ({ toggleMenu }) => {
 
       <div className="sidemenu-header">
         <Link to="/tenant" className="sidebarlogo" style={{ width: "100%", paddingLeft: "0", display: "flex", justifyContent: "center" }}>
-          <img src="/img/EDULAYNE-Logo- icon2048x510.png" alt="EduLayne" style={{ maxHeight: "1000px", width: "auto" }} />
+          {/* <img src="/img/EDULAYNE-Logo- icon2048x510.png" alt="EduLayne" style={{ height: "100px", width: "auto" }} /> */}
         </Link>
         <div className="search-container">
           <input

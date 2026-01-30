@@ -295,6 +295,19 @@ const AttendanceDashboard = () => {
         </div>
       )}
 
+      {/* Show message when data is fetched but empty */}
+      {selectedCourse && selectedBatch && attendanceData.length === 0 && !loading && (
+        <div className="alert alert-warning text-center p-5 mt-4">
+          <i className="fa-solid fa-calendar-xmark fa-3x mb-3 text-warning"></i>
+          <h4>{viewMode === 'daily' ? 'No Class Conducted' : 'No Data Found'}</h4>
+          <p className="text-muted">
+            {viewMode === 'daily'
+              ? "No class conducted this day for that batch and that course."
+              : "No attendance data found for this month for that batch and that course."}
+          </p>
+        </div>
+      )}
+
       {/* Action Buttons - Only show when data is loaded */}
       {(selectedCourse && selectedBatch && attendanceData.length > 0) && (
         <div className="row mb-4">
@@ -577,13 +590,13 @@ const AttendanceDashboard = () => {
                         <td>
                           {viewMode === 'daily' ? (
                             <span className={`badge ${record.status === 'present' ? 'bg-success' :
-                                record.status === 'late' ? 'bg-warning' : 'bg-danger'
+                              record.status === 'late' ? 'bg-warning' : 'bg-danger'
                               }`}>
                               {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
                             </span>
                           ) : (
                             <span className={`badge ${record.summary?.attendance_percentage >= 75 ? 'bg-success' :
-                                record.summary?.attendance_percentage >= 50 ? 'bg-warning' : 'bg-danger'
+                              record.summary?.attendance_percentage >= 50 ? 'bg-warning' : 'bg-danger'
                               }`}>
                               {record.summary?.attendance_percentage || 0}%
                             </span>
