@@ -1,0 +1,43 @@
+.create-session-btn:hover {
+    background: #ed1b76 !important;
+    box-shadow: 0 4px 12px rgba(237, 27, 118, 0.3);
+    transform: translateY(-1px);
+}
+
+.create-session-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(237, 27, 118, 0.2);
+}
+
+@media (max-width: 576px) {
+    .create-session-btn {
+        font-size: 13px !important;
+        padding: 10px 12px !important;
+        width: 80% !important;
+        max-width: 200px !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .create-session-btn {
+        font-size: 12px !important;
+        padding: 8px 10px !important;
+        width: 70% !important;
+        max-width: 160px !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+}
+
+@media (max-width: 375px) {
+    .create-session-btn {
+        font-size: 11px !important;
+        padding: 6px 8px !important;
+        width: 60% !important;
+        max-width: 140px !important;
+        margin: 0 auto !important;
+        display: block !important;
+    }
+}

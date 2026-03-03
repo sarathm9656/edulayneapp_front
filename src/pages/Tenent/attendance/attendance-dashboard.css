@@ -1,0 +1,135 @@
+.attendance-dashboard-page {
+  display: grid;
+  gap: 16px;
+}
+
+.attendance-header-card,
+.attendance-filter-card,
+.attendance-context-card {
+  padding: 18px;
+}
+
+.attendance-stat-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.attendance-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.attendance-stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.attendance-stat-card.primary .attendance-stat-icon {
+  color: #0f5ab8;
+  background: #e9f2ff;
+}
+
+.attendance-stat-card.info .attendance-stat-icon {
+  color: #0f8ea2;
+  background: #e8fafd;
+}
+
+.attendance-stat-card.success .attendance-stat-icon {
+  color: #1b8f56;
+  background: #eaf9f1;
+}
+
+.attendance-stat-card.warning .attendance-stat-icon {
+  color: #b67f08;
+  background: #fff6df;
+}
+
+.attendance-stat-card.danger .attendance-stat-icon {
+  color: #b9414c;
+  background: #ffecef;
+}
+
+.attendance-stat-card.secondary .attendance-stat-icon {
+  color: #5b6473;
+  background: #eff2f8;
+}
+
+.attendance-chart-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.attendance-search-wrap {
+  position: relative;
+  width: min(320px, 100%);
+}
+
+.attendance-search-wrap i {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #8a94a5;
+}
+
+.attendance-search-wrap input {
+  padding-left: 34px;
+}
+
+.attendance-table-wrap {
+  max-height: 480px;
+}
+
+.attendance-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #f8fafc;
+}
+
+.attendance-progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.attendance-progress-cell .progress {
+  flex: 1;
+  height: 8px;
+}
+
+.attendance-empty {
+  text-align: center;
+  padding: 30px 16px;
+}
+
+.attendance-empty i {
+  font-size: 2rem;
+  color: #a6adbb;
+}
+
+@media (max-width: 1200px) {
+  .attendance-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .attendance-stat-grid {
+    grid-template-columns: 1fr;
+  }
+}
