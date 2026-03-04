@@ -395,7 +395,10 @@
     font-size: 24px;
     cursor: pointer;
     transition: all 0.2s ease;
-    z-index: 1001;
+    position: relative;
+    z-index: 1201;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     /* Ensure it stays above other content if needed */
 }
 

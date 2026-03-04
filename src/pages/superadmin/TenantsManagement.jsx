@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import AddTenantModal from "../../components/super-admin/AddTenantModal.jsx";
 import EditTenantModal from "../../components/super-admin/EditTenantModal.jsx";
 import {
   deleteTenant,
+  disableTenant,
+  enableTenant,
   fetchTenantsWithCourseCountandUserCount,
 } from "../../redux/super.admin.slice";
-import { toast } from "react-toastify";
 
 const TenantsManagement = () => {
   const tenantDetails = useSelector((state) => state.superAdmin.tenantDetails);
@@ -16,47 +18,29 @@ const TenantsManagement = () => {
   const [editingTenant, setEditingTenant] = useState(null);
   const [deletingTenant, setDeletingTenant] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // all | active | inactive
   const dispatch = useDispatch();
-
-  console.log("tenantDetails=====================================", tenantDetails);
-
-  console.log(
-    "TenantsManagement rendered - isAddTenantModalOpen:",
-    isAddTenantModalOpen,
-    "isEditModalOpen:",
-    isEditModalOpen,
-    "editingTenant:",
-    editingTenant
-  );
-  console.log("tenantDetails:", tenantDetails);
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchTenantsWithCourseCountandUserCount());
   }, [dispatch]);
 
   const handleEdit = (tenantId) => {
-    console.log("Edit button clicked for tenant ID:", tenantId);
     const tenant = tenantDetails.find((t) => t.tenant._id === tenantId);
 
     if (tenant) {
-      console.log("Found tenant for editing:", tenant);
       // Pass the entire tenant object with all details (login, zoomapikey, etc.)
       setEditingTenant(tenant);
       setIsEditModalOpen(true);
-    } else {
-      console.log("Tenant not found for ID:", tenantId);
     }
   };
 
   const handleDeleteClick = (tenantId) => {
-    console.log("Delete button clicked for tenant ID:", tenantId);
     const tenant = tenantDetails.find((t) => t.tenant._id === tenantId);
     if (tenant) {
-      console.log("Found tenant for deletion:", tenant.tenant);
       setDeletingTenant(tenant.tenant);
       setIsDeleteModalOpen(true);
-    } else {
-      console.log("Tenant not found for ID:", tenantId);
     }
   };
 
@@ -67,8 +51,8 @@ const TenantsManagement = () => {
       await dispatch(deleteTenant(deletingTenant._id)).unwrap();
       setIsDeleteModalOpen(false);
       setDeletingTenant(null);
-    } catch (error) {
-      console.log("error", error);
+    } catch {
+      // errors are already surfaced via thunk/toasts where applicable
     }
   };
 
@@ -78,19 +62,39 @@ const TenantsManagement = () => {
   };
 
   const addTenant = () => {
-    console.log("Add tenant button clicked");
     setIsAddTenantModalOpen(true);
   };
 
   const closeEditModal = () => {
-    console.log("Closing edit modal");
     setIsEditModalOpen(false);
     setEditingTenant(null);
   };
 
   const closeAddModal = () => {
-    console.log("Closing add modal");
     setIsAddTenantModalOpen(false);
+  };
+
+  const goToTenantDetails = (tenantId) => {
+    navigate(`/superadmin/tenants/${tenantId}`);
+  };
+
+  const toggleTenantStatus = async (tenant) => {
+    const tenantId = tenant?.tenant?._id;
+    if (!tenantId) return;
+
+    try {
+      if (tenant.tenant.is_active) {
+        const ok = window.confirm(`Disable tenant "${tenant.tenant.name}"?`);
+        if (!ok) return;
+        await dispatch(disableTenant(tenantId)).unwrap();
+      } else {
+        const ok = window.confirm(`Enable tenant "${tenant.tenant.name}"?`);
+        if (!ok) return;
+        await dispatch(enableTenant(tenantId)).unwrap();
+      }
+    } catch {
+      // errors are surfaced via thunk/toasts
+    }
   };
 
   // Filter tenants based on search term
@@ -108,7 +112,11 @@ const TenantsManagement = () => {
           companyName.includes(searchLower) ||
           subdomain.includes(searchLower);
       }
-    ) || [];
+    ).filter((tenant) => {
+      if (statusFilter === "active") return !!tenant?.tenant?.is_active;
+      if (statusFilter === "inactive") return !tenant?.tenant?.is_active;
+      return true;
+    }) || [];
 
   return (
     <>
@@ -116,11 +124,45 @@ const TenantsManagement = () => {
       <main className="container-wrapper-scroll">
         <section className="course-single-page container-height">
           <div className="container-fluid">
-            <div className="row justify-content-center">
-              <div className="col-lg-2 col-md-3 col-6">
-                <button className="addtenant-btn" onClick={addTenant}>
-                  <i className="fa-solid fa-plus"></i> Add Tenant
-                </button>
+            <div className="sa-card p-3 p-md-4">
+              <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div>
+                  <h5 className="fw-bold mb-1">Tenants</h5>
+                  <div className="small text-muted">
+                    {filteredTenants.length} shown • {tenantDetails?.length || 0} total
+                  </div>
+                </div>
+
+                <div className="d-flex flex-column flex-sm-row gap-2 align-items-stretch align-items-sm-center">
+                  <div className="input-group">
+                    <span className="input-group-text bg-white">
+                      <i className="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input
+                      className="form-control"
+                      placeholder="Search by admin, company, or subdomain…"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+
+                  <select
+                    className="form-select"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    style={{ maxWidth: 180 }}
+                    aria-label="Filter by status"
+                  >
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+
+                  <button className="btn btn-primary" onClick={addTenant}>
+                    <i className="fa-solid fa-plus me-2"></i>
+                    Add Tenant
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -179,7 +221,8 @@ const TenantsManagement = () => {
                           }
                         </td>
                         <td className="text-nowrap">
-                          {tenant.tenant.name}
+                          <div className="fw-semibold">{tenant.tenant.name}</div>
+                          <div className="small text-muted">{tenant.tenant.subdomain}</div>
                         </td>
                         <td className="text-nowrap">
                           <span
@@ -207,11 +250,25 @@ const TenantsManagement = () => {
                         <td className="text-nowrap">
                           <div className="btn-group" role="group">
                             <button
+                              className="btn btn-sm btn-outline-secondary me-1"
+                              onClick={() => goToTenantDetails(tenant.tenant._id)}
+                              title="View Tenant"
+                            >
+                              <i className="fa-regular fa-eye"></i>
+                            </button>
+                            <button
                               className="btn btn-sm btn-outline-primary me-1"
                               onClick={() => handleEdit(tenant.tenant._id)}
                               title="Edit Tenant"
                             >
                               <i className="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button
+                              className={`btn btn-sm ${tenant.tenant.is_active ? "btn-outline-warning" : "btn-outline-success"} me-1`}
+                              onClick={() => toggleTenantStatus(tenant)}
+                              title={tenant.tenant.is_active ? "Disable Tenant" : "Enable Tenant"}
+                            >
+                              <i className={`fa-solid ${tenant.tenant.is_active ? "fa-ban" : "fa-circle-check"}`}></i>
                             </button>
                             <button
                               className="btn btn-sm btn-outline-danger"

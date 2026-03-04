@@ -47,6 +47,16 @@ const UserLogin = () => {
 
       toast.success("Login successful");
       if (response.data) {
+        try {
+          if (response.data.token) {
+            window.localStorage.setItem("token", response.data.token);
+          } else {
+            window.localStorage.removeItem("token");
+          }
+        } catch {
+          // ignore storage errors
+        }
+
         if (response.data.user.role === "tenant") {
           navigate("/tenant");
         } else if (response.data.user.role === "instructor") {

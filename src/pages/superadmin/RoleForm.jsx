@@ -8,6 +8,7 @@ const RoleForm = () => {
   const navigate = useNavigate();
   const { roleId } = useParams();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!!roleId);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -37,6 +38,8 @@ const RoleForm = () => {
     } catch (error) {
       toast.error('Error fetching role details');
       navigate('/superadmin/roles');
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -80,7 +83,9 @@ const RoleForm = () => {
 
       if (response.data.success) {
         toast.success(`Role ${roleId ? 'updated' : 'created'} successfully`);
-        navigate('/superadmin/roles');
+        const nextId = response.data?.data?._id || roleId;
+        if (nextId) navigate(`/superadmin/roles/${nextId}`);
+        else navigate('/superadmin/roles');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || `Error ${roleId ? 'updating' : 'creating'} role`);
@@ -89,91 +94,139 @@ const RoleForm = () => {
     }
   };
 
+  const toggleAllInGroup = (group, nextChecked) => {
+    const keys = group.permissions.map((p) => p.key);
+    setFormData((prev) => {
+      const next = new Set(prev.permissions);
+      if (nextChecked) keys.forEach((k) => next.add(k));
+      else keys.forEach((k) => next.delete(k));
+      return { ...prev, permissions: Array.from(next) };
+    });
+  };
+
+  const isGroupFullySelected = (group) =>
+    group.permissions.every((p) => formData.permissions.includes(p.key));
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          {roleId ? 'Edit Role' : 'Create Role'}
-        </h2>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter role name"
-            />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter role description"
-              rows="3"
-            />
-          </div>
-
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Permissions</h3>
-            <div className="space-y-6">
-              {PERMISSION_GROUPS.map((group) => (
-                <div key={group.name} className="border rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">{group.name}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {group.permissions.map((permission) => (
-                      <label
-                        key={permission.key}
-                        className="flex items-center space-x-3"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.permissions.includes(permission.key)}
-                          onChange={() => handlePermissionChange(permission.key)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {permission.label}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
+    <main className="container-wrapper-scroll">
+      <div className="container-fluid">
+        <div className="sa-card p-3 p-md-4">
+          <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+            <div>
+              <h5 className="fw-bold mb-1">{roleId ? 'Edit Role' : 'Create Role'}</h5>
+              <div className="small text-muted">Define permissions for this role.</div>
+            </div>
+            <div className="d-flex gap-2">
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => (roleId ? navigate(`/superadmin/roles/${roleId}`) : navigate('/superadmin/roles'))}
+              >
+                Cancel
+              </button>
+              <button type="submit" form="roleForm" disabled={loading || initialLoading} className="btn btn-primary">
+                {loading ? 'Saving…' : roleId ? 'Update Role' : 'Create Role'}
+              </button>
             </div>
           </div>
 
-          <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => navigate('/superadmin/roles')}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : roleId ? 'Update Role' : 'Create Role'}
-            </button>
-          </div>
-        </form>
+          {initialLoading ? (
+            <div className="d-flex align-items-center gap-2 text-muted">
+              <div className="spinner-border text-primary" role="status" aria-label="Loading" />
+              <div>Loading role…</div>
+            </div>
+          ) : (
+            <form id="roleForm" onSubmit={handleSubmit}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Role Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    required
+                    className="form-control"
+                    placeholder="e.g. tenant_admin"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Description *</label>
+                  <input
+                    type="text"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    required
+                    className="form-control"
+                    placeholder="What can this role do?"
+                  />
+                </div>
+              </div>
+
+              <hr className="my-4" />
+
+              <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <h6 className="fw-bold mb-0">Permissions</h6>
+                <div className="small text-muted">{formData.permissions.length} selected</div>
+              </div>
+
+              <div className="row g-3">
+                {PERMISSION_GROUPS.map((group) => (
+                  <div className="col-12" key={group.name}>
+                    <div className="border rounded-3 p-3 bg-white">
+                      <div className="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
+                        <div className="fw-semibold">{group.name}</div>
+                        <div className="d-flex align-items-center gap-2">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => toggleAllInGroup(group, true)}
+                          >
+                            Select all
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-secondary"
+                            onClick={() => toggleAllInGroup(group, false)}
+                          >
+                            Clear
+                          </button>
+                          <span className="badge text-bg-light border">
+                            {group.permissions.filter((p) => formData.permissions.includes(p.key)).length} / {group.permissions.length}
+                            {isGroupFullySelected(group) ? " • full" : ""}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="row g-2">
+                        {group.permissions.map((permission) => (
+                          <div className="col-md-6 col-lg-4" key={permission.key}>
+                            <label className="d-flex align-items-center gap-2 border rounded-3 px-3 py-2 w-100 bg-light">
+                              <input
+                                type="checkbox"
+                                className="form-check-input m-0"
+                                checked={formData.permissions.includes(permission.key)}
+                                onChange={() => handlePermissionChange(permission.key)}
+                              />
+                              <span className="small fw-semibold">{permission.label}</span>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </form>
+          )}
+        </div>
+
+        <section className="footer-wrapper">
+          <p>&copy; Copyright {new Date().getFullYear()} Edulayne. All rights reserved.</p>
+        </section>
       </div>
-    </div>
+    </main>
   );
 };
 

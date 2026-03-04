@@ -62,6 +62,14 @@ export const logoutUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: "Logout failed" });
+    } finally {
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("token");
+        }
+      } catch {
+        // ignore
+      }
     }
   }
 );
@@ -78,6 +86,14 @@ export const logoutInstructor = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: "Logout failed" });
+    } finally {
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("token");
+        }
+      } catch {
+        // ignore
+      }
     }
   }
 );

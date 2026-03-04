@@ -7,57 +7,35 @@ const AdminCourseManagement = () => {
   const { tenantDetails, coursesByTenant } = useSelector(
     (state) => state.superAdmin
   );
-  console.log("tenantDetails", tenantDetails);
-  console.log("coursesByTenant", coursesByTenant);
-  coursesByTenant.map((as) => {
-    console.log(as.instructors);
-  })
   const [tenantId, setTenantId] = useState("");
-  console.log(tenantId, "before");
 
   // display all courses in a card format based on the tenants
   const handleTenantChange = (e) => {
-    console.log(e.target.value, "clicked");
     setTenantId(e.target.value);
     dispatch(fetchCoursesByTenant(e.target.value));
   };
 
   return (
     <main className="container-wrapper-scroll">
-      <section className="addcourse">
-        <div className="container-fluid">
-          <div className="row justify-content-center">
-            <div className="col-xl-2 col-lg-3 col-md-4">
-              <button className="addnewcourse-btn">
-                <i className="fa-solid fa-plus"></i> Add New Course
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Tenant Selection Section */}
       <section className="container-fluid mb-4">
         <div className="row">
           <div className="col-12">
-            <h1 className="text-2xl font-bold mb-3">
-              Courses by Each Tenant and Enrolled Users Count
-            </h1>
-            <div className="flex flex-col gap-4">
+            <h5 className="fw-bold mb-3">Courses (view only)</h5>
+            <div className="d-flex flex-column gap-2">
               <select
-                className="border border-gray-300 p-4 rounded-md"
+                className="form-select"
                 name=""
                 id=""
                 onChange={handleTenantChange}
               >
-                <option className="text-gray-500" value="">
+                <option value="">
                   Select Tenant to view courses
                 </option>
                 {tenantDetails.map((tenant, index) => (
                   <option
                     key={index}
                     onChange={handleTenantChange}
-                    className="text-gray-500 cursor-pointer"
                     value={tenant.tenant._id}
                   >
                     {tenant.tenant.name}
@@ -74,6 +52,25 @@ const AdminCourseManagement = () => {
         <section className="container-fluid mb-4">
           <div className="row">
             <div className="col-12">
+              <div className="sa-card p-3 p-md-4">
+                <div className="row g-2">
+                  <div className="col-md-6">
+                    <div className="small text-muted">Total Courses</div>
+                    <div className="fs-5 fw-bold">{coursesByTenant.length}</div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="small text-muted">Total Enrolled Students</div>
+                    <div className="fs-5 fw-bold">
+                      {coursesByTenant.reduce(
+                        (acc, course) => acc + (Array.isArray(course.purchases) ? course.purchases.length : 0),
+                        0
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* legacy: stats were h1 blocks */}
+              {/*
               <div className="flex flex-col gap-4 my-6 border-b border-gray-300 pb-4">
                 <h1 className="text-xl font-bold">
                   Total Courses: {coursesByTenant.length}
@@ -86,6 +83,7 @@ const AdminCourseManagement = () => {
                   )}
                 </h1>
               </div>
+              */}
             </div>
           </div>
         </section>

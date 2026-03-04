@@ -7,6 +7,27 @@ const api = axios.create({
   withCredentials: true,
 });
 
+api.interceptors.request.use(
+  (config) => {
+    // Support Bearer token auth for environments where cookies are blocked or not stored.
+    try {
+      if (typeof window !== "undefined") {
+        const token = window.localStorage.getItem("token");
+        if (token) {
+          config.headers = config.headers || {};
+          if (!config.headers.Authorization && !config.headers.authorization) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Add a response interceptor
 api.interceptors.response.use(
   (response) => response,
@@ -44,9 +65,17 @@ api.interceptors.response.use(
     if (
       error.response &&
       error.response.status === 401 &&
-      error.response.data?.errorCode === "TOKEN_INVALID"
+      (error.response.data?.errorCode === "TOKEN_INVALID" ||
+        error.response.data?.errorCode === "TOKEN_MISSING")
     ) {
       toast.error("Session expired or token invalid. Please log in again.");
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("token");
+        }
+      } catch {
+        // ignore
+      }
       window.location.href = "/users/login";
       return Promise.reject(error);
     }

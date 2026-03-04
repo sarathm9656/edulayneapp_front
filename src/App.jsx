@@ -14,6 +14,7 @@ import UserList from "./pages/superadmin/UserList";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RolesList from "./pages/superadmin/RolesList";
 import RoleForm from "./pages/superadmin/RoleForm";
+import RoleDetails from "./pages/superadmin/RoleDetails";
 import AdminCourseManagement from "./pages/superadmin/AdminCourseManagement";
 import DashboardLayout from "./pages/Tenent/layouts/DashbordLayout";
 import ModernTenantLayout from "./pages/Tenent/layouts/ModernTenantLayout";
@@ -37,6 +38,7 @@ import UserLogin from "./pages/common/auth/UserLogin";
 import CourseDetails from "./pages/student/CourseDetails";
 import ViewCourseDetails from "./pages/Tenent/ViewCourseDetails";
 import TenantsManagement from "./pages/superadmin/TenantsManagement";
+import TenantDetails from "./pages/superadmin/TenantDetails";
 import Settings from "./pages/superadmin/Settings";
 import SuperAdminProfile from "./pages/superadmin/SuperAdminProfile";
 import InstructorLayout from "./pages/Instructor/InstructorLayout";
@@ -104,11 +106,13 @@ function App() {
           />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="tenants" element={<TenantsManagement />} />
+          <Route path="tenants/:tenantId" element={<TenantDetails />} />
           <Route path="users" element={<UserList />} />
           <Route path="users/create" element={<UserManagement />} />
           <Route path="roles" element={<RolesList />} />
           <Route path="roles/create" element={<RoleForm />} />
-          <Route path="roles/:roleId" element={<RoleForm />} />
+          <Route path="roles/:roleId" element={<RoleDetails />} />
+          <Route path="roles/:roleId/edit" element={<RoleForm />} />
           <Route path="courses" element={<AdminCourseManagement />} />
           <Route path="settings" element={<Settings />} />
           <Route path="profile" element={<SuperAdminProfile />} />

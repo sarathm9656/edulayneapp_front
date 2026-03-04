@@ -93,7 +93,7 @@ const ViewCourse = () => {
   const renderLessonContent = (lesson) => {
     if (!lesson) return null;
     const type = lesson.lesson_type_id?.lesson_type || 'text';
-    const api_root = api_url.replace('/api', '');
+    const api_root = api_url;
 
     switch (type) {
       case "video":
@@ -149,7 +149,14 @@ const ViewCourse = () => {
             </div>
             <h4 className="fw-bold">{lesson.lesson_title}</h4>
             <p className="text-muted mb-4">Click below to view the {type.toUpperCase()} document.</p>
-            <a href={`${api_root}/${lesson.file_path}`} target="_blank" rel="noreferrer" className={`btn btn-lg ${type === 'pdf' ? 'btn-danger' : 'btn-warning'} fw-bold px-5 rounded-pill`}>
+            <a
+              href={`${api_root}/${String(lesson.file_path || "")
+                .replace(/\\/g, "/")
+                .replace(/^\/+/, "")}`}
+              target="_blank"
+              rel="noreferrer"
+              className={`btn btn-lg ${type === 'pdf' ? 'btn-danger' : 'btn-warning'} fw-bold px-5 rounded-pill`}
+            >
               Open Document
             </a>
           </div>
@@ -329,7 +336,13 @@ const ViewCourse = () => {
                               <h6 className="fw-bold mb-1">{selectedLesson.lesson_title}.{selectedLesson.lesson_type_id?.lesson_type}</h6>
                               <small className="text-muted">Main Lesson File</small>
                             </div>
-                            <a href={`${api_url.replace('/api', '')}/${selectedLesson.file_path}`} target="_blank" className="btn btn-light rounded-circle shadow-sm">
+                            <a
+                              href={`${api_url}/${String(selectedLesson.file_path || "")
+                                .replace(/\\/g, "/")
+                                .replace(/^\/+/, "")}`}
+                              target="_blank"
+                              className="btn btn-light rounded-circle shadow-sm"
+                            >
                               <FaDownload className="text-dark" />
                             </a>
                           </div>

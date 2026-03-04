@@ -19,7 +19,7 @@ const Landing = () => {
       <header className="landing-header">
         <div className="header-container">
           <div className="logo-section">
-            <img src="/img/edulayne-logo.png" alt="Edulayne" className="logo-image" />
+            <img src="/img/edulayne-full-logo.png" alt="Edulayne" className="logo-image" />
           </div>
           <nav className="nav-menu">
             <a href="#home" className="nav-link">Home</a>
@@ -147,7 +147,7 @@ const Landing = () => {
         <div className="footer-container">
           <div className="footer-section">
             <div className="footer-logo">
-              <img src="/img/edulayne-logo.png" alt="Edulayne" className="footer-logo-img" />
+              <img src="/img/edulayne-full-logo.png" alt="Edulayne" className="footer-logo-img" />
             </div>
             <p>The ultimate learning platform for future‑ready skills.</p>
           </div>

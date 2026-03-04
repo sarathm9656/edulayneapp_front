@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import axios from "axios";
 
 const ProtectedRoute = ({ children }) => {
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children }) => {
       );
       setIsAuthenticated(true);
       console.log(response, "response");
-    } catch (error) {
+    } catch {
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
@@ -29,8 +29,11 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: "60vh" }}>
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" aria-label="Loading"></div>
+          <div className="mt-2 small text-muted">Checking session…</div>
+        </div>
       </div>
     );
   }

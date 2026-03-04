@@ -108,7 +108,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
     <>
       <div
         className={`sidebar-overlay ${isOpen ? "active" : ""}`}
-        onClick={toggleMenu}
+        onClick={() => toggleMenu(false)}
       ></div>
 
       <aside className={`modern-sidebar ${isOpen ? "active" : ""}`}>
@@ -116,8 +116,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
         <div className="modern-logo" style={{ width: "100%", justifyContent: "center", marginBottom: "20px" }}>
           <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "100px", width: "auto", objectFit: "contain" }} />
         </div>
-{/* 
-        {/* Search */}
+        {/* Search (disabled for now) */}
         {/* <div className="modern-search-container mb-4" style={{ width: "100%", maxWidth: "100%" }}>
           <i className="fa-solid fa-magnifying-glass modern-search-icon" style={{ left: "12px", fontSize: "14px" }}></i>
           <input
@@ -160,7 +159,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
                 className={`modern-nav-item ${location.pathname === item.path || (item.path !== "/student" && location.pathname.startsWith(`${item.path}/`)) ? "active" : ""}`}
                 onClick={() => {
                   if (searchTerm) clearSearch();
-                  if (window.innerWidth < 992) toggleMenu();
+                  if (window.innerWidth < 992) toggleMenu(false);
                 }}
               >
                 {item.icon}

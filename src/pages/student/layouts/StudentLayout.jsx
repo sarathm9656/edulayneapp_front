@@ -35,7 +35,7 @@ const StudentHeader = ({
   return (
     <div className="modern-header">
       <div className="d-flex align-items-center gap-3">
-        <button className="menu-toggle" onClick={toggleMenu}>
+        <button type="button" className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
           <i className="fa-solid fa-bars"></i>
         </button>
         <div className="modern-header-title">
@@ -115,8 +115,12 @@ const StudentLayout = () => {
     dispatch(fetchUser());
   }, [dispatch]);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = (nextOpen) => {
+    if (typeof nextOpen === "boolean") {
+      setIsMenuOpen(nextOpen);
+      return;
+    }
+    setIsMenuOpen((prev) => !prev);
   };
 
   const checkAuth = async () => {
@@ -137,6 +141,11 @@ const StudentLayout = () => {
   useEffect(() => {
     checkAuth();
   }, []);
+
+  // Close sidebar on navigation (for mobile)
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {

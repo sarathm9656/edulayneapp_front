@@ -424,7 +424,18 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                                 <span className="s-link text-truncate">
                                   {lesson.video_url || lesson.file_path?.replace(/\\/g, "/")?.split("/")?.pop()}
                                 </span>
-                                <a href={lesson.file_path ? `${import.meta.env.VITE_API_URL.replace('/api', '')}/${lesson.file_path}` : lesson.video_url} target="_blank" rel="noreferrer" className="s-action">
+                                <a
+                                  href={
+                                    lesson.file_path
+                                      ? `${import.meta.env.VITE_API_URL}/${String(lesson.file_path)
+                                          .replace(/\\/g, "/")
+                                          .replace(/^\/+/, "")}`
+                                      : lesson.video_url
+                                  }
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="s-action"
+                                >
                                   Access Resource
                                 </a>
                               </div>
