@@ -71,6 +71,7 @@ import AttendanceDashboard from "./pages/Tenent/attendance/AttendanceDashboard";
 import CourseBatchAttendance from "./pages/Tenent/attendance/CourseBatchAttendance";
 import TenantFinanceDashboard from "./pages/Tenent/finance/TenantFinanceDashboard";
 import InstructorFinanceDashboard from "./pages/Instructor/finance/InstructorFinanceDashboard";
+import TenantPlanDetails from "./pages/Tenent/TenantPlanDetails";
 
 function App() {
   return (
@@ -128,6 +129,7 @@ function App() {
           <Route path="student-details/:id" element={<StudentDetails />} />
           <Route path="Batches" element={<TenantBatches />} />
           <Route path="profile" element={<TenantProfile />} />
+          <Route path="plan-details" element={<TenantPlanDetails />} />
           {/* payment details showing page to the instructor */}
           <Route path="payroll" element={<TenantFinanceDashboard />} />
           <Route

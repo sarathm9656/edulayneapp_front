@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./landing.css";
 
@@ -13,8 +13,134 @@ const Landing = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const canTilt =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+    if (!canTilt) return;
+
+    const tiltElements = Array.from(document.querySelectorAll("[data-tilt]"));
+    const cleanups = tiltElements.map((el) => {
+      let rafId = 0;
+
+      const setTilt = (event) => {
+        const rect = el.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        const px = x / rect.width - 0.5;
+        const py = y / rect.height - 0.5;
+
+        const rotateY = px * 14;
+        const rotateX = -py * 10;
+
+        el.style.setProperty("--tilt-ry", `${rotateY.toFixed(2)}deg`);
+        el.style.setProperty("--tilt-rx", `${rotateX.toFixed(2)}deg`);
+        el.style.setProperty("--tilt-glow-x", `${(x / rect.width) * 100}%`);
+        el.style.setProperty("--tilt-glow-y", `${(y / rect.height) * 100}%`);
+        el.classList.add("is-tilting");
+      };
+
+      const onPointerMove = (event) => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => setTilt(event));
+      };
+
+      const onPointerLeave = () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = 0;
+        el.classList.remove("is-tilting");
+        el.style.setProperty("--tilt-ry", "0deg");
+        el.style.setProperty("--tilt-rx", "0deg");
+        el.style.setProperty("--tilt-glow-x", "50%");
+        el.style.setProperty("--tilt-glow-y", "35%");
+      };
+
+      el.addEventListener("pointermove", onPointerMove);
+      el.addEventListener("pointerleave", onPointerLeave);
+
+      return () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        el.removeEventListener("pointermove", onPointerMove);
+        el.removeEventListener("pointerleave", onPointerLeave);
+      };
+    });
+
+    return () => {
+      cleanups.forEach((fn) => fn());
+    };
+  }, []);
+
+  const courses = useMemo(
+    () => [
+      {
+        id: "digital-marketing",
+        title: "Digital Marketing with AI",
+        badge: "AI + Growth",
+        image: "/img/explore-image.png",
+        description:
+          "Blend digital marketing fundamentals with AI tools to plan, execute, and optimize smarter campaigns.",
+        bullets: [
+          "SEO, social, ads, email automation, and analytics — with AI workflows.",
+          "Create personalized campaigns and make data-backed decisions faster.",
+        ],
+      },
+      {
+        id: "ai-ml",
+        title: "AI & Machine Learning",
+        badge: "Build Models",
+        image: "/img/courses.png",
+        description:
+          "Learn core AI concepts, modern ML techniques, and hands-on model building with real datasets.",
+        bullets: [
+          "Supervised/unsupervised learning, evaluation, and deployment basics.",
+          "Turn data into predictions and solve real business + tech problems.",
+        ],
+      },
+      {
+        id: "cyber-security",
+        title: "Cyber Security",
+        badge: "Defend & Secure",
+        image: "/img/bg.jpg",
+        description:
+          "A career-focused path to identify, analyze, and defend against modern cyber threats.",
+        bullets: [
+          "Ethical hacking, pentesting, network security, and digital forensics.",
+          "Risk management, incident response, and industry-standard tools.",
+        ],
+      },
+      {
+        id: "prompt-engineering",
+        title: "Prompt Engineering",
+        badge: "AI Skill",
+        image: "/img/recorded-course.png",
+        description:
+          "Master prompt techniques for tools like ChatGPT and beyond to get accurate, high-quality outputs.",
+        bullets: [
+          "Prompt patterns, iteration methods, and optimization strategies.",
+          "Use cases for productivity, marketing, writing, and automation.",
+        ],
+      },
+      {
+        id: "mern-stack",
+        title: "MERN Stack",
+        badge: "Full Stack",
+        image: "/img/group-course.png",
+        description:
+          "Build full‑featured apps with MongoDB, Express, React, and Node.js — from APIs to UI.",
+        bullets: [
+          "Design REST APIs, model data, and ship responsive React interfaces.",
+          "Build production-ready projects with real-world patterns.",
+        ],
+      },
+    ],
+    []
+  );
+
   return (
-    <div className="landing-page">
+    <div className={`landing-page ${isVisible ? "is-visible" : ""}`}>
       {/* Header */}
       <header className="landing-header">
         <div className="header-container">
@@ -23,11 +149,13 @@ const Landing = () => {
           </div>
           <nav className="nav-menu">
             <a href="#home" className="nav-link">Home</a>
-            <a href="#digital-marketing" className="nav-link">Digital Marketing with AI</a>
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#courses" className="nav-link">Courses</a>
+            <a href="#digital-marketing" className="nav-link">Digital Marketing</a>
             <a href="#ai-ml" className="nav-link">AI &amp; ML</a>
             <a href="#cyber-security" className="nav-link">Cyber Security</a>
             <a href="#prompt-engineering" className="nav-link">Prompt Engineering</a>
-            <a href="#mern-stack" className="nav-link">MEARN Stack</a>
+            <a href="#mern-stack" className="nav-link">MERN Stack</a>
           </nav>
           <div className="header-actions">
             <Link to="/users/login" className="login-btn">Login</Link>
@@ -39,79 +167,159 @@ const Landing = () => {
       {/* Hero Section */}
       <section id="home" className="hero-section">
         <div className="hero-container">
-          <div className="hero-content">
-            <h1 className="hero-title">
-              <span className="shining-text">Master</span> Future Skills
-            </h1>
-            <p className="hero-subtitle">
-              Don’t wait for the future — build it! Enroll in one of our cutting‑edge courses and gain the in‑demand skills.
-            </p>
-            <div className="hero-actions">
-              <Link to="/users/login" className="cta-primary">Explore Courses</Link>
+          <div className="hero-grid">
+            <div className="hero-content">
+              <div className="hero-eyebrow">Learn. Build. Get hired.</div>
+              <h1 className="hero-title">
+                <span className="shining-text">Master</span> Future Skills
+              </h1>
+              <p className="hero-subtitle">
+                Don’t wait for the future — build it. Learn with mentor support, real projects, and a modern curriculum designed for outcomes.
+              </p>
+              <div className="hero-actions">
+                <Link to="/users/login" className="cta-primary">Explore Courses</Link>
+                <a href="#courses" className="cta-ghost">See curriculum</a>
+              </div>
+
+              <div className="hero-stats">
+                <div className="stat-pill" data-tilt>
+                  <div className="stat-pill-icon">🎯</div>
+                  <div className="stat-pill-text">
+                    <strong>Mentor-led</strong>
+                    <span>Guidance that sticks</span>
+                  </div>
+                </div>
+                <div className="stat-pill" data-tilt>
+                  <div className="stat-pill-icon">🧪</div>
+                  <div className="stat-pill-text">
+                    <strong>Projects</strong>
+                    <span>Build portfolio work</span>
+                  </div>
+                </div>
+                <div className="stat-pill" data-tilt>
+                  <div className="stat-pill-icon">⚡</div>
+                  <div className="stat-pill-text">
+                    <strong>AI-first</strong>
+                    <span>Use modern tools</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="hero-visual" aria-hidden="true">
+              <div className="visual-scene" data-tilt>
+                <div className="visual-card visual-main">
+                  <img src="/img/explore-image.png" alt="" className="visual-image" />
+                  <div className="visual-overlay">
+                    <div className="visual-badge tilt-pop">
+                      <span className="visual-dot" />
+                      Live learning paths
+                    </div>
+                  </div>
+                </div>
+                <div className="visual-card visual-secondary tilt-pop">
+                  <img src="/img/courses.png" alt="" className="visual-image" />
+                </div>
+                <div className="visual-card visual-tertiary tilt-pop">
+                  <img src="/img/instructor.png" alt="" className="visual-image" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Course Sections */}
-      <section id="digital-marketing" className="course-section">
-        <h2 className="section-title"><span className="shining-text">Digital Marketing with AI</span></h2>
-        <p>
-          Unlock the power of artificial intelligence to elevate your marketing strategies. This course blends the art of digital marketing with the science of AI‑driven tools to help you plan, execute, and optimize smarter campaigns.
-        </p>
-        <ul>
-          <li>Learn SEO, social media optimization, paid advertising, email automation, and performance analytics — all enhanced with AI tools.</li>
-          <li>Whether you’re a beginner or an experienced marketer, this course will empower you to make data‑backed decisions, create personalized campaigns, and stay far ahead in today’s competitive digital landscape.</li>
-        </ul>
-        <Link to="/users/login" className="cta-secondary">More Details</Link>
+      {/* Features */}
+      <section id="features" className="features-section">
+        <div className="section-head">
+          <h2 className="section-title">Built for outcomes</h2>
+          <p className="section-subtitle">
+            Everything is designed to move you from learning to building — fast.
+          </p>
+        </div>
+
+        <div className="features-grid">
+          <article className="feature-card" data-tilt>
+            <div className="feature-icon">🧑‍🏫</div>
+            <h3>Mentor support</h3>
+            <p>Get clarity quickly with structured guidance, checkpoints, and feedback.</p>
+          </article>
+          <article className="feature-card" data-tilt>
+            <div className="feature-icon">🧩</div>
+            <h3>Real projects</h3>
+            <p>Build practical work that looks great in your portfolio — not toy demos.</p>
+          </article>
+          <article className="feature-card" data-tilt>
+            <div className="feature-icon">🧠</div>
+            <h3>AI workflows</h3>
+            <p>Learn how to use AI tools effectively — to research, build, test, and ship.</p>
+          </article>
+          <article className="feature-card" data-tilt>
+            <div className="feature-icon">📈</div>
+            <h3>Progress tracking</h3>
+            <p>Stay on track with milestones that keep momentum (and motivation) high.</p>
+          </article>
+        </div>
       </section>
 
-      <section id="ai-ml" className="course-section">
-        <h2 className="section-title"><span className="shining-text">AI &amp; Machine Learning</span></h2>
-        <p>
-          Step into the world of intelligent systems with our comprehensive AI &amp; Machine Learning course. Understand the foundations of artificial intelligence, explore machine learning models, and gain hands‑on experience building predictive systems.
-        </p>
-        <ul>
-          <li>Work on real‑world datasets, apply supervised and unsupervised learning techniques, and learn how to train, test, and deploy AI models.</li>
-          <li>By the end of the course, you’ll not only understand how machines learn but also how to use AI effectively to solve complex business and technology challenges.</li>
-        </ul>
-        <Link to="/users/login" className="cta-secondary">More Details</Link>
+      {/* Courses */}
+      <section id="courses" className="courses-section">
+        <div className="section-head">
+          <h2 className="section-title">
+            Pick a <span className="shining-text">learning path</span>
+          </h2>
+          <p className="section-subtitle">
+            Explore our most popular tracks. Each course includes hands-on practice and guided learning.
+          </p>
+        </div>
+
+        <div className="courses-grid">
+          {courses.map((course) => (
+            <article key={course.id} id={course.id} className="course-card" data-tilt>
+              <div className="course-media">
+                <img src={course.image} alt="" className="course-image" />
+                <div className="course-badge tilt-pop">{course.badge}</div>
+              </div>
+              <div className="course-body">
+                <h3 className="course-title">{course.title}</h3>
+                <p className="course-description">{course.description}</p>
+                <ul className="course-points">
+                  {course.bullets.map((b) => (
+                    <li key={b}>{b}</li>
+                  ))}
+                </ul>
+                <Link to="/users/login" className="cta-secondary">More Details</Link>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
 
-      <section id="cyber-security" className="course-section">
-        <h2 className="section-title"><span className="shining-text">Cyber Security</span></h2>
-        <p>
-          Become the shield in the digital age with this career‑focused Cyber Security course. Learn how to identify, analyze, and defend against cyber threats that affect individuals and organizations alike.
-        </p>
-        <ul>
-          <li>Master ethical hacking, penetration testing, network security, and digital forensics while gaining real‑world experience through practical labs and simulations.</li>
-          <li>The course also covers risk management, incident response, and the latest tools used by cybersecurity professionals worldwide.</li>
-        </ul>
-        <Link to="/users/login" className="cta-secondary">More Details</Link>
-      </section>
-
-      <section id="prompt-engineering" className="course-section">
-        <h2 className="section-title"><span className="shining-text">Prompt Engineering</span></h2>
-        <p>
-          Harness the true power of artificial intelligence through the art of Prompt Engineering. This course teaches you how to communicate effectively with AI tools like ChatGPT, Midjourney, and others to generate accurate, creative, and high‑quality results.
-        </p>
-        <ul>
-          <li>Explore prompt design techniques, optimization strategies, and industry use cases that can dramatically enhance productivity, creativity, and automation.</li>
-          <li>By mastering the skill of crafting precise, high‑impact prompts, you’ll unlock new possibilities for business, marketing, writing, and beyond — making AI work smarter for you.</li>
-        </ul>
-        <Link to="/users/login" className="cta-secondary">More Details</Link>
-      </section>
-
-      <section id="mern-stack" className="course-section">
-        <h2 className="section-title"><span className="shining-text">ME(A)RN Stack</span></h2>
-        <p>
-          Master the complete ME(A)RN Stack — MongoDB, Express, React, and Node.js — to build dynamic, responsive, and full‑featured web applications from the ground up.
-        </p>
-        <ul>
-          <li>Design RESTful APIs with Node.js and Express, manage data efficiently using MongoDB, and craft beautiful, interactive interfaces with React.</li>
-          <li>Whether you’re a beginner looking to start a career in web development or an experienced coder aiming to upskill, this course equips you with the tools, confidence, and real‑world experience to build production‑ready applications and stand out as a full‑stack developer.</li>
-        </ul>
-        <Link to="/users/login" className="cta-secondary">More Details</Link>
+      {/* About */}
+      <section id="about" className="about-section">
+        <div className="about-grid">
+          <div className="about-visual" data-tilt>
+            <img src="/img/learners.png" alt="" className="about-image" />
+            <div className="about-float about-float-one tilt-pop">
+              <img src="/img/leaners-icon.png" alt="" />
+              <span>Community</span>
+            </div>
+            <div className="about-float about-float-two tilt-pop">
+              <img src="/img/instructors-icon.png" alt="" />
+              <span>Mentors</span>
+            </div>
+          </div>
+          <div className="about-content">
+            <h2 className="section-title">Learn with structure. Grow with confidence.</h2>
+            <p className="section-subtitle">
+              Edulayne combines modern curriculum, mentor support, and hands-on projects so you can build skills that employers value.
+            </p>
+            <div className="about-actions">
+              <Link to="/users/login" className="cta-primary">Get Started</Link>
+              <a href="#courses" className="cta-ghost">Browse courses</a>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Testimonials */}
@@ -154,9 +362,9 @@ const Landing = () => {
           <div className="footer-section">
             <h4>Platform</h4>
             <ul>
-              <li><a href="#features">Features</a></li>
               <li><a href="#courses">Courses</a></li>
               <li><a href="#about">About</a></li>
+              <li><a href="#features">Features</a></li>
             </ul>
           </div>
           <div className="footer-section">

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { FaChevronDown, FaEdit, FaTrash, FaPlus, FaGripLines, FaRobot, FaRocket } from "react-icons/fa";
 import axios from "axios";
 import { MdClose, MdDragIndicator, MdPlayCircle, MdDescription, MdQuiz, MdLiveTv, MdAssignment, MdLink, MdFilePresent, MdCalendarToday, MdOutlineAddCircleOutline, MdAutoStories } from "react-icons/md";
@@ -328,7 +329,6 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
       case "video": return <MdPlayCircle className="icon-red" />;
       case "pdf": return <MdDescription className="icon-blue" />;
       case "quiz": return <MdQuiz className="icon-gold" />;
-      case "live": return <MdLiveTv className="icon-cyan" />;
       case "assignment": return <MdAssignment className="icon-green" />;
       case "link": return <MdLink className="icon-indigo" />;
       case "ppt": return <MdFilePresent className="icon-orange" />;
@@ -428,8 +428,8 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                                   href={
                                     lesson.file_path
                                       ? `${import.meta.env.VITE_API_URL}/${String(lesson.file_path)
-                                          .replace(/\\/g, "/")
-                                          .replace(/^\/+/, "")}`
+                                        .replace(/\\/g, "/")
+                                        .replace(/^\/+/, "")}`
                                       : lesson.video_url
                                   }
                                   target="_blank"
@@ -490,7 +490,7 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                   <div className="col-12 mt-4">
                     <label className="builder-label-v2 mb-3">Asset Type Selection</label>
                     <div className="type-selector-v2">
-                      {['text', 'video', 'pdf', 'ppt', 'link', 'quiz', 'live'].map(type => (
+                      {['video', 'pdf', 'ppt', 'link', 'quiz'].map(type => (
                         <button
                           key={type}
                           type="button"
@@ -542,9 +542,9 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                           <input type="file" className="form-control-minimal" name="file" accept={formData.lesson_type === 'pdf' ? '.pdf' : '.ppt,.pptx'} onChange={handleFileChange} />
                         </div>
                       )}
-                      {(formData.lesson_type === 'link' || formData.lesson_type === 'live') && (
+                      {formData.lesson_type === 'link' && (
                         <div className="link-input-card">
-                          <label>{formData.lesson_type === 'link' ? 'External URL' : 'Meeting / Stream URL'}</label>
+                          <label>External URL</label>
                           <input type="url" className="form-control-minimal" name="video_url" placeholder="https://..." value={formData.video_url} onChange={handleChange} />
                         </div>
                       )}
@@ -569,7 +569,7 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
       </div>
 
       {/* Edit Modal - Premium Redesign */}
-      {showEditModal && (
+      {showEditModal && createPortal(
         <div className="premium-modal-overlay">
           <div className="modal-content-premium animate-pop-in">
             <div className="modal-header-v2">
@@ -590,7 +590,7 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                 <div className="col-md-6">
                   <label className="builder-label-v2">Type</label>
                   <select className="builder-input-v2" name="lesson_type" value={editFormData.lesson_type} onChange={handleEditChange}>
-                    {["text", "video", "pdf", "ppt", "quiz", "link", "live", "assignment"].map((t) => (
+                    {["text", "video", "pdf", "ppt", "quiz", "link", "assignment"].map((t) => (
                       <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
@@ -624,9 +624,9 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                   </div>
                 )}
 
-                {(editFormData.lesson_type === "link" || editFormData.lesson_type === "live") && (
+                {editFormData.lesson_type === "link" && (
                   <div className="col-12">
-                    <label className="builder-label-v2">{editFormData.lesson_type === "link" ? "External URL" : "Meeting / Stream URL"}</label>
+                    <label className="builder-label-v2">External URL</label>
                     <input className="builder-input-v2" type="url" name="video_url" value={editFormData.video_url} onChange={handleEditChange} placeholder="https://..." />
                   </div>
                 )}
@@ -661,11 +661,12 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Edit Section Modal */}
-      {showEditModuleModal && (
+      {showEditModuleModal && createPortal(
         <div className="premium-modal-overlay">
           <div className="modal-content-premium animate-pop-in">
             <div className="modal-header-v2">
@@ -714,7 +715,8 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Quiz Modal Integration */}

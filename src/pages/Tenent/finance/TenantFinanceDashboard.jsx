@@ -4,6 +4,8 @@ import FinanceStatsCard from '../../../components/finance/FinanceStatsCard';
 import FinanceFilters from '../../../components/finance/FinanceFilters';
 import TransactionsTable from '../../../components/finance/TransactionsTable';
 import BatchAnalyticsTable from '../../../components/finance/BatchAnalyticsTable';
+import ParticipantLogTable from '../../../components/finance/ParticipantLogTable';
+import ParticipantEventsTable from '../../../components/finance/ParticipantEventsTable';
 import { FaBalanceScale, FaChalkboardTeacher, FaClock, FaUsers, FaChartPie, FaListUl, FaFileExport, FaSyncAlt, FaMoneyBillWave } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
@@ -119,6 +121,9 @@ const TenantFinanceDashboard = () => {
     const [selectedInstructorLogsLoading, setSelectedInstructorLogsLoading] = useState(false);
     const [dailyData, setDailyData] = useState([]);
     const [logPeriod, setLogPeriod] = useState('month');
+    const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'));
+    const [participantEvents, setParticipantEvents] = useState([]);
+    const [participantEventsLoading, setParticipantEventsLoading] = useState(false);
 
     const formatHours = (value) => `${Number(value || 0).toFixed(2)} hrs`;
     const formatCurrency = (value) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(Number(value || 0));
@@ -137,7 +142,13 @@ const TenantFinanceDashboard = () => {
         if (tenantId) {
             fetchLogs();
         }
-    }, [tenantId, month, year, logPeriod]);
+    }, [tenantId, month, year, logPeriod, selectedDate]);
+
+    useEffect(() => {
+        if (tenantId && activeTab === 'participants') {
+            fetchParticipantEvents();
+        }
+    }, [tenantId, month, year, logPeriod, selectedDate, activeTab]);
 
     useEffect(() => {
         const instructorId = selectedInstructor?._id;
@@ -170,7 +181,8 @@ const TenantFinanceDashboard = () => {
 
     const fetchLogs = async () => {
         try {
-            const logsRes = await api.get(`/finance/tenant/logs/${tenantId}?month=${month}&year=${year}&period=${logPeriod}&limit=1000`);
+            const dateParam = logPeriod === 'day' && selectedDate ? `&date=${selectedDate}` : '';
+            const logsRes = await api.get(`/finance/tenant/logs/${tenantId}?month=${month}&year=${year}&period=${logPeriod}${dateParam}&limit=1000`);
             if (logsRes.data.success) {
                 setLogs(logsRes.data.logs);
                 if (logPeriod === 'month') {
@@ -179,6 +191,24 @@ const TenantFinanceDashboard = () => {
             }
         } catch (error) {
             console.error("Failed to fetch tenant logs", error);
+        }
+    };
+
+    const fetchParticipantEvents = async () => {
+        setParticipantEventsLoading(true);
+        try {
+            const dateParam = logPeriod === 'day' && selectedDate ? `&date=${selectedDate}` : '';
+            const res = await api.get(`/finance/tenant/participant-events/${tenantId}?month=${month}&year=${year}&period=${logPeriod}${dateParam}&limit=1000`);
+            if (res.data.success) {
+                setParticipantEvents(res.data.events || []);
+            } else {
+                setParticipantEvents([]);
+            }
+        } catch (error) {
+            console.error("Failed to fetch participant events", error);
+            setParticipantEvents([]);
+        } finally {
+            setParticipantEventsLoading(false);
         }
     };
 
@@ -462,6 +492,20 @@ const TenantFinanceDashboard = () => {
                                 <FaListUl size={16} />
                                 Detailed Logs
                             </button>
+                            <button
+                                className="tab-btn"
+                                style={{
+                                    flex: 1, padding: '12px', fontWeight: '700', fontSize: '14px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                    background: activeTab === 'participants' ? 'white' : 'transparent',
+                                    color: activeTab === 'participants' ? theme.primary : theme.textMuted,
+                                    boxShadow: activeTab === 'participants' ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                }}
+                                onClick={() => setActiveTab('participants')}
+                            >
+                                <FaUsers size={16} />
+                                Participant Log
+                            </button>
                         </div>
 
                         <div className="tab-content" style={{ padding: '0 16px 24px' }}>
@@ -543,21 +587,67 @@ const TenantFinanceDashboard = () => {
                                 </div>
                             ) : activeTab === 'batches' ? (
                                 <BatchAnalyticsTable data={batchBreakdown} periodLabel={`This Month • ${moment([year, month - 1]).format('MMMM YYYY')}`} />
-                            ) : (
+                            ) : activeTab === 'logs' ? (
                                 <div>
                                     <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <h4 style={{ margin: 0, fontWeight: '700' }}>Master Session Logs</h4>
-                                        <select
-                                            value={logPeriod}
-                                            onChange={(e) => setLogPeriod(e.target.value)}
-                                            style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid ' + theme.border, fontSize: '13px', color: theme.text }}
-                                        >
-                                            <option value="day">Today's Sessions</option>
-                                            <option value="week">Weekly View</option>
-                                            <option value="month">Monthly Statement</option>
-                                        </select>
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                            {logPeriod === 'day' && (
+                                                <input
+                                                    type="date"
+                                                    value={selectedDate}
+                                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid ' + theme.border, fontSize: '13px', color: theme.text }}
+                                                />
+                                            )}
+                                            <select
+                                                value={logPeriod}
+                                                onChange={(e) => setLogPeriod(e.target.value)}
+                                                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid ' + theme.border, fontSize: '13px', color: theme.text }}
+                                            >
+                                                <option value="day">Day View</option>
+                                                <option value="week">Weekly View</option>
+                                                <option value="month">Monthly Statement</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <TransactionsTable data={logs} type="log" />
+                                </div>
+                            ) : (
+                                <div>
+                                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h4 style={{ margin: 0, fontWeight: '700' }}>Participant Log</h4>
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                            {logPeriod === 'day' && (
+                                                <input
+                                                    type="date"
+                                                    value={selectedDate}
+                                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                                    style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid ' + theme.border, fontSize: '13px', color: theme.text }}
+                                                />
+                                            )}
+                                            <select
+                                                value={logPeriod}
+                                                onChange={(e) => setLogPeriod(e.target.value)}
+                                                style={{ padding: '8px 12px', borderRadius: '8px', border: '1px solid ' + theme.border, fontSize: '13px', color: theme.text }}
+                                            >
+                                                <option value="day">Day View</option>
+                                                <option value="week">Weekly View</option>
+                                                <option value="month">Monthly Statement</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    {participantEventsLoading ? (
+                                        <div style={{ padding: '16px', background: '#f8fafc', border: '1px solid ' + theme.border, borderRadius: '12px', color: theme.textMuted, fontWeight: '700' }}>
+                                            Loading participant events...
+                                        </div>
+                                    ) : (
+                                        <ParticipantEventsTable data={participantEvents} />
+                                    )}
+
+                                    <div style={{ marginTop: '16px' }}>
+                                        <ParticipantLogTable title="Session Summary (Participants Count)" data={logs} />
+                                    </div>
                                 </div>
                             )}
                         </div>

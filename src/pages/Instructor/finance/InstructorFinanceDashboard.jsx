@@ -142,6 +142,11 @@ const InstructorFinanceDashboard = () => {
 
     const actualHours = breakdownSummary.totalHours || stats.totalHours || 0;
     const actualClasses = breakdownSummary.totalClasses || stats.totalClasses || 0;
+    const contractedHours = Number(stats?.contractedHours || 0);
+    const monthlyConductedHours = Number(stats?.totalHours || 0);
+    const contractProgressPct = contractedHours > 0
+        ? Math.min((monthlyConductedHours / contractedHours) * 100, 100)
+        : 0;
 
     return (
         <div style={containerStyle}>
@@ -224,13 +229,16 @@ const InstructorFinanceDashboard = () => {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <span style={{ color: '#6b7280', fontSize: '14px' }}>Contracted Hours</span>
-                                <span style={{ fontWeight: '600' }}>{stats.contractedHours || 0} hrs/month</span>
+                                <span style={{ fontWeight: '600' }}>{contractedHours} hrs/month</span>
                             </div>
                             <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f3f4f6' }}>
                                 <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '4px' }}>Progress (Conducted / Contracted)</div>
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '8px' }}>
+                                    {Number(monthlyConductedHours || 0).toFixed(2)} / {contractedHours || 0} hrs
+                                </div>
                                 <div style={{ width: '100%', background: '#e5e7eb', height: '8px', borderRadius: '4px', overflow: 'hidden' }}>
                                     <div style={{
-                                        width: `${Math.min((actualHours / (stats.contractedHours || 1)) * 100, 100)}%`,
+                                        width: `${contractProgressPct}%`,
                                         background: '#3b82f6',
                                         height: '100%'
                                     }}></div>

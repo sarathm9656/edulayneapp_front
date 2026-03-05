@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { FaTimes, FaPlus, FaTrash, FaEdit, FaSave, FaChevronLeft } from "react-icons/fa";
 import { MdQuiz, MdCheckCircle, MdOutlineQuestionAnswer, MdTimer, MdStars, MdRefresh } from "react-icons/md";
 import axios from "axios";
@@ -186,7 +187,7 @@ const QuizManagementModal = ({ isOpen, onClose, courseId, moduleId, courseName, 
 
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div className="quiz-mgmt-overlay">
             <div className="quiz-mgmt-container animate-popup">
                 {/* Header */}
@@ -879,7 +880,8 @@ const QuizManagementModal = ({ isOpen, onClose, courseId, moduleId, courseName, 
                     color: white;
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 };
 

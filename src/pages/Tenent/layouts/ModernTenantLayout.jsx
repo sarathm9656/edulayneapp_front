@@ -45,6 +45,8 @@ const ModernTenantLayout = () => {
         if (path.includes("students")) return "Students";
         if (path.includes("meetings")) return "Live Sessions";
         if (path.includes("payroll")) return "Financials";
+        if (path.includes("plan-details")) return "Contact";
+        if (path.includes("plan")) return "Plans";
         return "Dashboard";
     };
 
@@ -89,8 +91,14 @@ const ModernTenantLayout = () => {
 
                 <div className="modern-upgrade-card d-none d-lg-block">
                     <h4>Upgrade your plan</h4>
-                    <p>Unlock premium features & enhance your LMS experience!</p>
-                    <button className="modern-upgrade-btn">Upgrade Now</button>
+                    <p>Contact us to upgrade and unlock premium LMS features.</p>
+                    <button
+                        className="modern-upgrade-btn"
+                        onClick={() => navigate("/tenant/plan-details")}
+                        type="button"
+                    >
+                        Contact Now
+                    </button>
                 </div>
 
                 <div className="modern-logout" onClick={handleLogout}>
