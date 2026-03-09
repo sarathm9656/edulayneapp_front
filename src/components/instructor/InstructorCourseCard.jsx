@@ -1,19 +1,24 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { applyCourseImageFallback, resolveCourseImageUrl } from "@/utils/courseImage";
 
 const InstructorCourseCard = ({ course }) => {
   const { course_title, is_active, image, category, level, description } = course;
   const api_url = useMemo(() => import.meta.env.VITE_API_URL, []);
 
   const imageSrc = useMemo(() => {
-    if (!image) return "/img/chessthumbnail.jpg";
-    return `${api_url}/uploads/courses/${image}`;
+    return resolveCourseImageUrl(image, api_url);
   }, [image, api_url]);
 
   return (
     <div className="course-card-premium">
       <div className="card-image-wrapper">
-        <img src={imageSrc} alt={course_title} className="course-image" />
+        <img
+          src={imageSrc}
+          alt={course_title}
+          className="course-image"
+          onError={applyCourseImageFallback}
+        />
         <div className="card-badges">
           <span className={`badge-status ${is_active ? "active" : "inactive"}`}>
             {is_active ? "Active" : "Inactive"}

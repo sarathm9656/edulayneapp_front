@@ -4,13 +4,13 @@ import FinanceStatsCard from '../../../components/finance/FinanceStatsCard';
 import FinanceFilters from '../../../components/finance/FinanceFilters';
 import TransactionsTable from '../../../components/finance/TransactionsTable';
 import BatchAnalyticsTable from '../../../components/finance/BatchAnalyticsTable';
-import ParticipantLogTable from '../../../components/finance/ParticipantLogTable';
 import ParticipantEventsTable from '../../../components/finance/ParticipantEventsTable';
 import { FaBalanceScale, FaChalkboardTeacher, FaClock, FaUsers, FaChartPie, FaListUl, FaFileExport, FaSyncAlt, FaMoneyBillWave } from 'react-icons/fa';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUser } from '../../../redux/user.slice';
+import { exportTenantFinanceReport } from '../../../utils/financePdfExport';
 
 import PaymentModal from '../../../components/finance/PaymentModal';
 
@@ -89,7 +89,15 @@ const TenantFinanceDashboard = () => {
     };
 
     const handleDownloadPDF = () => {
-        window.print();
+        exportTenantFinanceReport({
+            month,
+            year,
+            summary,
+            instructors,
+            batchBreakdown,
+            logs,
+            totalInstructorPayout
+        });
     };
 
     useEffect(() => {
@@ -308,7 +316,8 @@ const TenantFinanceDashboard = () => {
     const mainContentLayout = {
         display: 'grid',
         gridTemplateColumns: '1fr 340px',
-        gap: '32px'
+        gap: '32px',
+        minWidth: 0
     };
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
@@ -327,6 +336,28 @@ const TenantFinanceDashboard = () => {
                     button:active { transform: scale(0.98); }
                     .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
                     .tab-btn:hover { color: #4f46e5; background: #f1f5f9; }
+                    .finance-tab-strip { display: flex; }
+                    @media (max-width: 1024px) {
+                        .finance-tab-scroll {
+                            overflow-x: auto;
+                            overflow-y: hidden;
+                            -webkit-overflow-scrolling: touch;
+                            scrollbar-width: thin;
+                        }
+                        .finance-tab-strip {
+                            width: max-content;
+                            min-width: 100%;
+                            flex-wrap: nowrap;
+                            gap: 8px;
+                        }
+                        .finance-tab-strip .tab-btn {
+                            flex: 0 0 auto !important;
+                            white-space: nowrap;
+                            min-width: max-content;
+                            padding-left: 14px !important;
+                            padding-right: 14px !important;
+                        }
+                    }
                 `}
             </style>
 
@@ -415,16 +446,16 @@ const TenantFinanceDashboard = () => {
             <div style={isMobile ? { display: 'flex', flexDirection: 'column', gap: '32px' } : mainContentLayout}>
 
                 {/* Main Action Area */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', minWidth: 0 }}>
 
                     {/* Visual Analytics */}
-                    <div style={{ background: 'white', padding: '28px', borderRadius: '16px', border: '1px solid ' + theme.border, boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+                    <div style={{ background: 'white', padding: '28px', borderRadius: '16px', border: '1px solid ' + theme.border, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', minWidth: 0 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                             <h3 style={{ fontSize: '20px', fontWeight: '700', color: theme.secondary, margin: 0 }}>Activity Distribution</h3>
                             <div style={{ fontSize: '12px', color: theme.textMuted, fontWeight: '600', padding: '4px 12px', background: theme.bg, borderRadius: '20px' }}>Daily Breakdown</div>
                         </div>
-                        <div style={{ height: '320px', width: '100%' }}>
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div style={{ height: 320, width: '100%', minWidth: 0, minHeight: 320 }}>
+                            <ResponsiveContainer width="100%" height={320} minWidth={0}>
                                 <BarChart data={dailyData}>
                                     <defs>
                                         <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -449,7 +480,8 @@ const TenantFinanceDashboard = () => {
 
                     {/* Navigation Tabs */}
                     <div style={{ background: 'white', borderRadius: '16px', border: '1px solid ' + theme.border, boxShadow: '0 1px 3px rgba(0,0,0,0.02)', overflow: 'hidden' }}>
-                        <div style={{ display: 'flex', background: '#f8fafc', padding: '6px', margin: '16px', borderRadius: '12px' }} className="no-print">
+                        <div className="finance-tab-scroll no-print" style={{ background: '#f8fafc', padding: '6px', margin: '16px', borderRadius: '12px' }}>
+                            <div className="finance-tab-strip">
                             <button
                                 className="tab-btn"
                                 style={{
@@ -506,6 +538,7 @@ const TenantFinanceDashboard = () => {
                                 <FaUsers size={16} />
                                 Participant Log
                             </button>
+                            </div>
                         </div>
 
                         <div className="tab-content" style={{ padding: '0 16px 24px' }}>
@@ -645,9 +678,6 @@ const TenantFinanceDashboard = () => {
                                         <ParticipantEventsTable data={participantEvents} />
                                     )}
 
-                                    <div style={{ marginTop: '16px' }}>
-                                        <ParticipantLogTable title="Session Summary (Participants Count)" data={logs} />
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -687,7 +717,7 @@ const TenantFinanceDashboard = () => {
                                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                                 }}
                             >
-                                PDF Export (Print)
+                                PDF Detailed Report
                                 <span style={{ fontSize: '10px', background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>ISO</span>
                             </button>
                             <button

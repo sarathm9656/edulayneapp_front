@@ -63,9 +63,6 @@ const TenantPlanDetails = () => {
           <div className="flex-grow-1">
             <div className="fw-bold mb-1">Email</div>
             <div className="text-muted">{valueOrDash(supportEmail)}</div>
-            <small className="text-muted d-block mt-2">
-              Set `VITE_SUPPORT_EMAIL` in `client-side/.env` to show it here.
-            </small>
           </div>
         </div>
       </div>
@@ -78,9 +75,6 @@ const TenantPlanDetails = () => {
           <div className="flex-grow-1">
             <div className="fw-bold mb-1">Phone</div>
             <div className="text-muted">{valueOrDash(supportPhone)}</div>
-            <small className="text-muted d-block mt-2">
-              Set `VITE_SUPPORT_PHONE` in `client-side/.env`.
-            </small>
           </div>
         </div>
       </div>
@@ -93,9 +87,6 @@ const TenantPlanDetails = () => {
           <div className="flex-grow-1">
             <div className="fw-bold mb-1">WhatsApp</div>
             <div className="text-muted">{valueOrDash(supportWhatsapp)}</div>
-            <small className="text-muted d-block mt-2">
-              Set `VITE_SUPPORT_WHATSAPP` in `client-side/.env`.
-            </small>
           </div>
         </div>
       </div>
@@ -108,9 +99,6 @@ const TenantPlanDetails = () => {
           <div className="flex-grow-1">
             <div className="fw-bold mb-1">Address</div>
             <div className="text-muted">{valueOrDash(supportAddress)}</div>
-            <small className="text-muted d-block mt-2">
-              Set `VITE_SUPPORT_ADDRESS` in `client-side/.env`.
-            </small>
           </div>
         </div>
       </div>

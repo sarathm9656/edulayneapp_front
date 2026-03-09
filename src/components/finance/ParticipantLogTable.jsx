@@ -13,6 +13,7 @@ const ParticipantLogTable = ({ title, data }) => {
     };
 
     const getStartTime = (row) => row?.actual_start_time || row?.scheduled_start_time || row?.created_at;
+    const getLastJoinTime = (row) => row?.last_participant_join_at || row?.last_joined_at || null;
 
     if (!data || data.length === 0) {
         return (
@@ -51,8 +52,8 @@ const ParticipantLogTable = ({ title, data }) => {
                     <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#111827' }}>{title}</h3>
                 </div>
             )}
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: '980px', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
                             <th style={thStyle}>Date & Meeting</th>
@@ -66,21 +67,28 @@ const ParticipantLogTable = ({ title, data }) => {
                     </thead>
                     <tbody>
                         {data.map((row, index) => {
-                            const participants = Number(row?.meeting_participants_count ?? row?.participants_count ?? 0);
+                            const participants = Number(
+                                row?.participant_distinct_count
+                                ?? row?.meeting_participants_count
+                                ?? row?.participants_count
+                                ?? 0
+                            );
                             const durationMinutes = getDurationMinutes(row);
                             const durationHours = (durationMinutes / 60).toFixed(1);
                             const status = row?.status || 'pending';
+                            const startTime = getStartTime(row);
+                            const lastJoinTime = getLastJoinTime(row);
 
                             return (
                                 <tr
-                                    key={index}
+                                    key={row?._id || index}
                                     style={{ transition: 'background 0.2s' }}
                                     onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
                                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                                 >
                                     <td style={tdStyle}>
                                         <div style={{ fontWeight: '600', color: '#111827' }}>
-                                            {getStartTime(row) ? moment(getStartTime(row)).format('MMM DD, YYYY') : 'N/A'}
+                                            {startTime ? moment(startTime).format('MMM DD, YYYY') : 'N/A'}
                                         </div>
                                         <div style={{ fontSize: '11px', color: '#6b7280', fontFamily: 'monospace', marginTop: '2px' }}>
                                             Meeting ID: {row?.dyte_meeting_id?.slice(0, 10) || 'N/A'}
@@ -103,15 +111,18 @@ const ParticipantLogTable = ({ title, data }) => {
                                     </td>
                                     <td style={tdStyle}>
                                         <div style={{ fontWeight: '800', color: '#4f46e5' }}>{Number.isFinite(participants) ? participants : 0}</div>
+                                        <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>
+                                            distinct joins
+                                        </div>
                                     </td>
                                     <td style={tdStyle}>
-                                        {row?.last_joined_at ? (
+                                        {lastJoinTime ? (
                                             <>
-                                                <div style={{ fontWeight: '600' }}>{moment(row.last_joined_at).format('h:mm A')}</div>
-                                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{moment(row.last_joined_at).fromNow()}</div>
+                                                <div style={{ fontWeight: '600' }}>{moment(lastJoinTime).format('MMM DD, YYYY')}</div>
+                                                <div style={{ fontSize: '12px', color: '#6b7280' }}>{moment(lastJoinTime).format('h:mm A')}</div>
                                             </>
                                         ) : (
-                                            <span style={{ color: '#9ca3af', fontWeight: '600' }}>—</span>
+                                            <span style={{ color: '#9ca3af', fontWeight: '600' }}>-</span>
                                         )}
                                     </td>
                                     <td style={tdStyle}>

@@ -211,6 +211,91 @@
     gap: 12px;
 }
 
+.student-shell-header {
+    padding: 20px 22px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 245, 250, 0.96) 100%);
+    box-shadow: var(--modern-card-shadow);
+    border: 1px solid rgba(255, 77, 148, 0.08);
+    position: relative;
+    overflow: visible;
+}
+
+.student-shell-header-main {
+    min-width: 0;
+}
+
+.student-shell-header-title h2 {
+    font-size: 28px;
+    letter-spacing: -0.5px;
+}
+
+.student-shell-header-title p {
+    font-size: 13px;
+}
+
+.student-shell-actions {
+    margin-left: auto;
+}
+
+.student-shell-profile {
+    gap: 10px;
+}
+
+.student-shell-icon-btn {
+    width: 42px;
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.student-shell-avatar {
+    box-shadow: inset 0 0 0 1px rgba(255, 77, 148, 0.12);
+}
+
+.student-profile-menu {
+    z-index: 1305;
+    top: calc(100% + 10px);
+}
+
+.student-mobile-sidebar {
+    overflow-y: auto;
+}
+
+.student-sidebar-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.student-sidebar-logo {
+    margin-bottom: 12px !important;
+}
+
+.student-sidebar-close {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: var(--modern-secondary);
+    flex-shrink: 0;
+}
+
+.student-sidebar-nav {
+    gap: 10px;
+}
+
+.student-sidebar-logout {
+    margin-top: 8px;
+    border-radius: 12px;
+    background: #fff5f8;
+    color: #d63384;
+}
+
 .modern-avatar {
     width: 40px;
     height: 40px;
@@ -329,6 +414,19 @@
         padding: 20px 15px;
     }
 
+    .student-mobile-sidebar {
+        width: min(86vw, 320px);
+        padding: 18px 16px 24px;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+        left: 0;
+        transform: translateX(-100%);
+    }
+
+    .student-mobile-sidebar.active {
+        transform: translateX(0);
+    }
+
     .modern-grid {
         display: flex;
         flex-direction: column;
@@ -344,6 +442,20 @@
         margin-bottom: 24px;
     }
 
+    .student-shell-header {
+        padding: 16px 18px;
+        border-radius: 20px;
+    }
+
+    .student-sidebar-logo img {
+        height: 68px !important;
+    }
+
+    .student-sidebar-nav .modern-nav-item {
+        padding: 13px 14px;
+        border-radius: 14px;
+    }
+
     .modern-search-container {
         order: 3;
         max-width: 100%;
@@ -353,13 +465,88 @@
 
 @media (max-width: 768px) {
     .modern-header {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
     }
 
     .modern-header-actions {
-        width: 100%;
-        justify-content: space-between;
+        width: auto;
+        justify-content: flex-end;
+    }
+
+    .student-shell-header {
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .student-shell-header-main {
+        gap: 12px !important;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .student-shell-header-title h2 {
+        font-size: 20px;
+        line-height: 1.1;
+    }
+
+    .student-shell-header-title p {
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .student-shell-actions {
+        flex-shrink: 0;
+    }
+
+    .student-shell-profile {
+        gap: 8px;
+    }
+
+    .student-profile-menu {
+        right: 0;
+        left: auto;
+        min-width: 200px !important;
+    }
+
+    .student-shell-icon-btn,
+    .student-shell-avatar,
+    .menu-toggle {
+        width: 40px !important;
+        height: 40px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .modern-main {
+        padding: 14px 10px 18px;
+    }
+
+    .student-shell-header {
+        padding: 14px 14px;
+        border-radius: 18px;
+    }
+
+    .student-shell-header-title p {
+        display: none;
+    }
+
+    .student-mobile-sidebar {
+        width: min(88vw, 300px);
+    }
+
+    .student-sidebar-logo img {
+        height: 56px !important;
+    }
+
+    .student-profile-menu {
+        position: fixed;
+        top: 78px;
+        right: 12px;
+        left: auto;
+        width: min(220px, calc(100vw - 24px));
+        min-width: 0 !important;
     }
 }
 

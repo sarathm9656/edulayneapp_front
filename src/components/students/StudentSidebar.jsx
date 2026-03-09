@@ -111,10 +111,20 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
         onClick={() => toggleMenu(false)}
       ></div>
 
-      <aside className={`modern-sidebar ${isOpen ? "active" : ""}`}>
+      <aside className={`modern-sidebar student-mobile-sidebar ${isOpen ? "active" : ""}`}>
         {/* Header / Logo */}
-        <div className="modern-logo" style={{ width: "100%", justifyContent: "center", marginBottom: "20px" }}>
-          <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "100px", width: "auto", objectFit: "contain" }} />
+        <div className="student-sidebar-top">
+          <div className="modern-logo student-sidebar-logo" style={{ width: "100%", justifyContent: "center", marginBottom: "20px" }}>
+            <img src="/img/edulayne-full-logo.png" alt="Edulayne" style={{ height: "100px", width: "auto", objectFit: "contain" }} />
+          </div>
+          <button
+            type="button"
+            className="student-sidebar-close d-lg-none"
+            onClick={() => toggleMenu(false)}
+            aria-label="Close menu"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
         </div>
         {/* Search (disabled for now) */}
         {/* <div className="modern-search-container mb-4" style={{ width: "100%", maxWidth: "100%" }}>
@@ -150,7 +160,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
         </div>  */}
 
         {/* Menu Items */}
-        <nav className="modern-nav">
+        <nav className="modern-nav student-sidebar-nav">
           {filteredMenuItems.length > 0 ? (
             filteredMenuItems.map((item) => (
               <Link
@@ -178,7 +188,7 @@ const StudentSidebar = ({ isOpen, toggleMenu }) => {
           {/* <button className="settings-btn modern-nav-item w-100 border-0 bg-transparent text-start">
             <i className="fa-solid fa-gear"></i> Settings
           </button> */}
-          <a onClick={handleLogout} className="modern-logout">
+          <a onClick={handleLogout} className="modern-logout student-sidebar-logout">
             <i className="fa-solid fa-right-from-bracket"></i>
             <span>Logout</span>
           </a>

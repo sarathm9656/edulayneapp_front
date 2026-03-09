@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { ImCheckboxUnchecked, ImCheckboxChecked } from "react-icons/im";
 import { FaUsers, FaBook } from "react-icons/fa";
+import { applyCourseImageFallback, resolveCourseImageUrl } from "@/utils/courseImage";
 
 const SelectCourseCard = ({ course, setCourseIds, courseIds, instructorId }) => {
   // Find the courseId object in courseIds
@@ -24,6 +25,11 @@ const SelectCourseCard = ({ course, setCourseIds, courseIds, instructorId }) => 
       }
     });
   };
+
+  const imageSrc = useMemo(
+    () => resolveCourseImageUrl(course.image, import.meta.env.VITE_API_URL),
+    [course.image]
+  );
 
   return (
     <div 
@@ -71,9 +77,10 @@ const SelectCourseCard = ({ course, setCourseIds, courseIds, instructorId }) => 
         {/* Course Image */}
         <div className="text-center mb-3">
           <img
-            src={useMemo(() => `${import.meta.env.VITE_API_URL}/uploads/courses/${course.image}`, [course.image])}
+            src={imageSrc}
             alt={course.course_title}
             className="img-fluid rounded"
+            onError={applyCourseImageFallback}
             style={{
               width: '100%',
               height: '120px',

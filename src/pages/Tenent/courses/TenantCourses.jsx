@@ -14,6 +14,7 @@ import {
   fetchLanguages,
   fetchCourses,
 } from "@/redux/course.slice";
+import { applyCourseImageFallback, resolveCourseImageUrl } from "@/utils/courseImage";
 import { Stack, Pagination } from "@mui/material";
 
 const TenantCourses = () => {
@@ -210,9 +211,10 @@ const TenantCourses = () => {
                           <td className="px-4 py-3 border-bottom-0">
                             <div className="d-flex align-items-center">
                               <img
-                                src={course.image ? `${import.meta.env.VITE_API_URL}/uploads/courses/${course.image}` : "/img/chessthumbnail.jpg"}
+                                src={resolveCourseImageUrl(course.image, import.meta.env.VITE_API_URL)}
                                 alt=""
                                 className="rounded-3 me-3 shadow-sm"
+                                onError={applyCourseImageFallback}
                                 style={{ width: "48px", height: "48px", objectFit: "cover" }}
                               />
                               <div>

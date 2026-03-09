@@ -15,7 +15,9 @@ import {
     FaTimes,
     FaIdCard,
     FaPlus,
-    FaPlay
+    FaPlay,
+    FaTable,
+    FaThLarge
 } from 'react-icons/fa';
 
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +32,9 @@ const InstructorBatches = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [sortBy, setSortBy] = useState('active'); // Default sort active first? Or name.
     const [currentPage, setCurrentPage] = useState(1);
+    const [viewMode, setViewMode] = useState(() =>
+        typeof window !== 'undefined' && window.innerWidth < 768 ? 'card' : 'table'
+    );
     const cardsPerPage = 10;
 
     const [activeTab, setActiveTab] = useState('students');
@@ -272,6 +277,61 @@ const InstructorBatches = () => {
 
     const handlePageChange = (pageNumber) => setCurrentPage(pageNumber);
 
+    const renderBatchCard = (batch) => (
+        <div key={batch._id} className="col-12 col-md-6">
+            <div className="h-100 border rounded-4 p-3 bg-white shadow-sm">
+                <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div className="d-flex align-items-center gap-3">
+                        <div
+                            className="avatar-placeholder bg-soft-primary text-indigo rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                            style={{ width: "44px", height: "44px" }}
+                        >
+                            {batch.batch_name?.charAt(0)}
+                        </div>
+                        <div>
+                            <div className="fw-bold text-dark">{batch.batch_name}</div>
+                            {batch.batch_code && <small className="text-muted">{batch.batch_code}</small>}
+                        </div>
+                    </div>
+                    {getStatusBadge(batch.status)}
+                </div>
+
+                <div className="d-grid gap-2 mb-3">
+                    <div className="small text-muted">
+                        <div className="fw-semibold text-dark mb-1">Course</div>
+                        <div>{batch.course_id?.course_title || 'N/A'}</div>
+                    </div>
+                    <div className="small text-muted">
+                        <div className="fw-semibold text-dark mb-1">Schedule</div>
+                        <div><FaClock className="me-1" /> {batch.batch_time || '-'}</div>
+                        <div className="mt-1">
+                            {batch.recurring_days && batch.recurring_days.length > 0
+                                ? batch.recurring_days.map(d => d.slice(0, 3)).join(", ")
+                                : "Flexible"}
+                        </div>
+                    </div>
+                    <div className="small text-muted">
+                        <div className="fw-semibold text-dark mb-1">Dates</div>
+                        <div>Start: {formatDate(batch.start_date)}</div>
+                        <div>End: {formatDate(batch.end_date)}</div>
+                    </div>
+                </div>
+
+                <div className="d-flex flex-wrap gap-2">
+                    {renderStartButton(batch)}
+                    <button
+                        className="btn btn-sm btn-light border shadow-sm"
+                        onClick={() => openBatchDetailsModal(batch)}
+                        title="View Details"
+                    >
+                        <FaEye className="text-primary me-1" />
+                        Details
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
     if (myBatchesLoading) {
         return (
             <div className="d-flex justify-content-center align-items-center w-100" style={{ minHeight: "60vh" }}>
@@ -296,7 +356,7 @@ const InstructorBatches = () => {
                     </div>
                     <div className="col-md-6">
                         <div className="row g-2">
-                            <div className="col-md-5">
+                            <div className="col-md-4">
                                 <div className="input-group">
                                     <span className="input-group-text bg-light border-end-0"><FaSearch className="text-muted" /></span>
                                     <input
@@ -308,7 +368,7 @@ const InstructorBatches = () => {
                                     />
                                 </div>
                             </div>
-                            <div className="col-md-4">
+                            <div className="col-md-3">
                                 <select className="form-select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
                                     <option value="all">All Status</option>
                                     <option value="active">Active</option>
@@ -316,13 +376,35 @@ const InstructorBatches = () => {
                                     <option value="completed">Completed</option>
                                 </select>
                             </div>
-                            <div className="col-md-3">
+                            <div className="col-md-2">
                                 <select className="form-select" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
                                     <option value="active">Default</option>
                                     <option value="name">Name</option>
                                     <option value="course">Course</option>
                                     <option value="date">Date</option>
                                 </select>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="btn-group w-100" role="group" aria-label="Batch view mode">
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                        onClick={() => setViewMode('table')}
+                                        title="Table view"
+                                    >
+                                        <FaTable className="me-1" />
+                                        Table
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm ${viewMode === 'card' ? 'btn-primary' : 'btn-outline-primary'}`}
+                                        onClick={() => setViewMode('card')}
+                                        title="Card view"
+                                    >
+                                        <FaThLarge className="me-1" />
+                                        Card
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -331,78 +413,93 @@ const InstructorBatches = () => {
 
             {/* Content Card */}
             <div className="modern-card p-0 overflow-hidden" style={{ gridColumn: "span 12" }}>
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle custom-table mb-0">
-                        <thead className="bg-light text-muted">
-                            <tr>
-                                <th className="ps-4">Batch Info</th>
-                                <th>Course</th>
-                                <th>Schedule</th>
-                                <th>Dates</th>
-                                <th>Status</th>
-                                <th className="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentBatches.length > 0 ? (
-                                currentBatches.map(batch => (
-                                    <tr key={batch._id}>
-                                        <td className="ps-4">
-                                            <div className="d-flex align-items-center gap-3">
-                                                <div className="avatar-placeholder bg-soft-primary text-indigo rounded-3 d-flex align-items-center justify-content-center fw-bold" style={{ width: "40px", height: "40px" }}>
-                                                    {batch.batch_name?.charAt(0)}
+                {viewMode === 'table' ? (
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle custom-table mb-0">
+                            <thead className="bg-light text-muted">
+                                <tr>
+                                    <th className="ps-4">Batch Info</th>
+                                    <th>Course</th>
+                                    <th>Schedule</th>
+                                    <th>Dates</th>
+                                    <th>Status</th>
+                                    <th className="text-end pe-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentBatches.length > 0 ? (
+                                    currentBatches.map(batch => (
+                                        <tr key={batch._id}>
+                                            <td className="ps-4">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div className="avatar-placeholder bg-soft-primary text-indigo rounded-3 d-flex align-items-center justify-content-center fw-bold" style={{ width: "40px", height: "40px" }}>
+                                                        {batch.batch_name?.charAt(0)}
+                                                    </div>
+                                                    <div>
+                                                        <div className="fw-bold text-dark">{batch.batch_name}</div>
+                                                        {batch.batch_code && <small className="text-muted">{batch.batch_code}</small>}
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <div className="fw-bold text-dark">{batch.batch_name}</div>
-                                                    {batch.batch_code && <small className="text-muted">{batch.batch_code}</small>}
+                                            </td>
+                                            <td>{batch.course_id?.course_title || 'N/A'}</td>
+                                            <td>
+                                                <div className="d-flex flex-column">
+                                                    <div className="fw-semibold">
+                                                        <FaClock className="text-muted me-1 small" /> {batch.batch_time || "-"}
+                                                    </div>
+                                                    <small className="text-muted">
+                                                        {batch.recurring_days && batch.recurring_days.length > 0
+                                                            ? batch.recurring_days.map(d => d.slice(0, 3)).join(", ")
+                                                            : "Flexible"}
+                                                    </small>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td>{batch.course_id?.course_title || 'N/A'}</td>
-                                        <td>
-                                            <div className="d-flex flex-column">
-                                                <div className="fw-semibold">
-                                                    <FaClock className="text-muted me-1 small" /> {batch.batch_time || "-"}
+                                            </td>
+                                            <td>
+                                                <div className="small text-muted">
+                                                    <div>Start: {formatDate(batch.start_date)}</div>
+                                                    <div>End: {formatDate(batch.end_date)}</div>
                                                 </div>
-                                                <small className="text-muted">
-                                                    {batch.recurring_days && batch.recurring_days.length > 0
-                                                        ? batch.recurring_days.map(d => d.slice(0, 3)).join(", ")
-                                                        : "Flexible"}
-                                                </small>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div className="small text-muted">
-                                                <div>Start: {formatDate(batch.start_date)}</div>
-                                                <div>End: {formatDate(batch.end_date)}</div>
-                                            </div>
-                                        </td>
-                                        <td>{getStatusBadge(batch.status)}</td>
-                                        <td className="text-end pe-4">
-                                            <div className="d-flex justify-content-end align-items-center">
-                                                {renderStartButton(batch)}
-                                                <button
-                                                    className="btn btn-sm btn-light border shadow-sm rounded-circle"
-                                                    onClick={() => openBatchDetailsModal(batch)}
-                                                    title="View Details"
-                                                >
-                                                    <FaEye className="text-primary" />
-                                                </button>
-                                            </div>
+                                            </td>
+                                            <td>{getStatusBadge(batch.status)}</td>
+                                            <td className="text-end pe-4">
+                                                <div className="d-flex justify-content-end align-items-center">
+                                                    {renderStartButton(batch)}
+                                                    <button
+                                                        className="btn btn-sm btn-light border shadow-sm rounded-circle"
+                                                        onClick={() => openBatchDetailsModal(batch)}
+                                                        title="View Details"
+                                                    >
+                                                        <FaEye className="text-primary" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-5 text-muted">
+                                            <div className="mb-3"><FaChalkboardTeacher className="fs-1 opacity-25" /></div>
+                                            <p className="mb-0">No batches found matching your criteria.</p>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="6" className="text-center py-5 text-muted">
-                                        <div className="mb-3"><FaChalkboardTeacher className="fs-1 opacity-25" /></div>
-                                        <p className="mb-0">No batches found matching your criteria.</p>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="p-4">
+                        {currentBatches.length > 0 ? (
+                            <div className="row g-3">
+                                {currentBatches.map(renderBatchCard)}
+                            </div>
+                        ) : (
+                            <div className="text-center py-5 text-muted">
+                                <div className="mb-3"><FaChalkboardTeacher className="fs-1 opacity-25" /></div>
+                                <p className="mb-0">No batches found matching your criteria.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {/* Pagination */}
                 {totalPages > 1 && (

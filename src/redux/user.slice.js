@@ -42,10 +42,7 @@ export const updateUser = createAsyncThunk(
       throw new Error("User ID is required for update");
     }
 
-    const response = await api.put(
-      `${import.meta.env.VITE_API_URL}/users/${userId}`,
-      user
-    );
+    const response = await api.put(`/users/${userId}`, user);
     return response.data.data;
   }
 );
@@ -54,11 +51,9 @@ export const logoutUser = createAsyncThunk(
   "user/logoutUser",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        `${import.meta.env.VITE_API_URL}/auth/logout`,
-        {},
-        { withCredentials: true }
-      );
+      const response = await api.post("/auth/logout", {}, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: "Logout failed" });
@@ -78,11 +73,9 @@ export const logoutInstructor = createAsyncThunk(
   "user/logoutInstructor",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.post(
-        `${import.meta.env.VITE_API_URL}/auth/instructor/logout`,
-        {},
-        { withCredentials: true }
-      );
+      const response = await api.post("/auth/instructor/logout", {}, {
+        withCredentials: true,
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || { message: "Logout failed" });

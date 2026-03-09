@@ -52,14 +52,15 @@ const TransactionsTable = ({ title, data, type = 'log' }) => {
                     <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#111827' }}>{title}</h3>
                 </div>
             )}
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: type === 'log' ? '980px' : '760px', borderCollapse: 'collapse' }}>
                     <thead>
                         {type === 'log' ? (
                             <tr>
                                 <th style={thStyle}>Date & Meeting</th>
                                 <th style={thStyle}>Instructor</th>
                                 <th style={thStyle}>Batch / Topic</th>
+                                <th style={thStyle}>Participants Count</th>
                                 <th style={thStyle}>Tenant / School</th>
                                 <th style={thStyle}>Session Time</th>
                                 <th style={thStyle}>Conducted Time</th>
@@ -81,6 +82,12 @@ const TransactionsTable = ({ title, data, type = 'log' }) => {
                             const durationMinutes = getDurationMinutes(row);
                             const durationHours = (durationMinutes / 60).toFixed(1);
                             const status = row.status || 'pending';
+                            const participants = Number(
+                                row?.participant_distinct_count
+                                ?? row?.meeting_participants_count
+                                ?? row?.participants_count
+                                ?? 0
+                            );
 
                             return (
                                 <tr key={index} style={{ transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
@@ -103,6 +110,12 @@ const TransactionsTable = ({ title, data, type = 'log' }) => {
                                             <td style={tdStyle}>
                                                 <div style={{ fontWeight: '600', color: '#4f46e5' }}>{row.batch_id?.batch_name || 'Individual Class'}</div>
                                                 <div style={{ fontSize: '12px', color: '#6b7280' }}>{row.topic || 'General Session'}</div>
+                                            </td>
+                                            <td style={tdStyle}>
+                                                <div style={{ fontWeight: '800', color: '#4f46e5' }}>
+                                                    {Number.isFinite(participants) ? participants : 0}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#6b7280' }}>distinct users</div>
                                             </td>
                                             <td style={tdStyle}>
                                                 <div style={{ fontWeight: '600', color: '#374151' }}>{row.tenant_id?.name || row.tenant_id?.school_name || 'Generic Tenant'}</div>

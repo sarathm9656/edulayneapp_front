@@ -33,20 +33,20 @@ const StudentHeader = ({
   }, []);
 
   return (
-    <div className="modern-header">
-      <div className="d-flex align-items-center gap-3">
+    <div className="modern-header student-shell-header">
+      <div className="d-flex align-items-center gap-3 student-shell-header-main">
         <button type="button" className="menu-toggle" onClick={toggleMenu} aria-label="Toggle menu">
           <i className="fa-solid fa-bars"></i>
         </button>
-        <div className="modern-header-title">
+        <div className="modern-header-title student-shell-header-title">
           <h2 className="fw-bold mb-0">{getPageTitle()}</h2>
-          <p className="text-muted mb-0 small">Welcome to your learning portal</p>
+          <p className="text-muted mb-0 small">Student portal</p>
         </div>
       </div>
 
-      <div className="modern-header-actions">
-        <div className="modern-user-profile">
-          <button className="btn btn-light rounded-circle shadow-sm position-relative">
+      <div className="modern-header-actions student-shell-actions">
+        <div className="modern-user-profile student-shell-profile">
+          <button className="btn btn-light rounded-circle shadow-sm position-relative student-shell-icon-btn" type="button">
             <i className="fa-regular fa-bell text-muted"></i>
             <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
           </button>
@@ -54,23 +54,23 @@ const StudentHeader = ({
           <div className="dropdown position-relative" ref={menuRef}>
             <button
               type="button"
-              className="d-flex align-items-center gap-2 border-0 bg-transparent p-0"
+              className="d-flex align-items-center gap-2 border-0 bg-transparent p-0 student-shell-profile-trigger"
               onClick={() => setMenuOpen((prev) => !prev)}
             >
               <div
-                className="avatar-placeholder bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold"
+                className="avatar-placeholder bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center fw-bold student-shell-avatar"
                 style={{ width: "40px", height: "40px" }}
               >
                 {firstName?.charAt(0) || "S"}
               </div>
-              <div className="d-none d-md-block text-start">
+              <div className="d-none d-lg-block text-start">
                 <h6 className="mb-0 fw-bold">{fullName}</h6>
                 <small className="text-muted">Student</small>
               </div>
             </button>
 
             <ul
-              className={`dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2 ${menuOpen ? "show" : ""}`}
+              className={`dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 p-2 student-profile-menu ${menuOpen ? "show" : ""}`}
               style={{ minWidth: "180px" }}
             >
               <li>

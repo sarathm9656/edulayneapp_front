@@ -8,10 +8,8 @@ const StudentViewBatch = () => {
   const user = useSelector((state) => state.user?.user);
   const [batches, setBatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [viewMode, setViewMode] = useState("table");
 
   // User object structure can vary: sometimes Root.user, sometimes Root.user.user
   const studentId = user?._id || user?.id || user?.user?._id || user?.user?.id;
@@ -143,7 +141,6 @@ const StudentViewBatch = () => {
       if (!studentId) return;
       try {
         setLoading(true);
-        setError(null);
         const response = await axios.get(`${api_url}/batch-student/student/enrolled-batches`, {
           withCredentials: true
         });
@@ -152,7 +149,6 @@ const StudentViewBatch = () => {
         }
       } catch (error) {
         console.error("Error fetching batches:", error);
-        setError(error);
         toast.error("Failed to load batches.");
       } finally {
         setLoading(false);
@@ -177,6 +173,17 @@ const StudentViewBatch = () => {
     }
     return "Pending";
   };
+
+  const formatDate = (value) => {
+    if (!value) return "TBD";
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? "TBD" : parsed.toLocaleDateString();
+  };
+
+  const getStatusClass = (status) =>
+    status === "active"
+      ? "bg-success bg-opacity-10 text-success"
+      : "bg-secondary bg-opacity-10 text-secondary";
 
   // --- Recordings Modal Logic ---
   const [showRecordingsModal, setShowRecordingsModal] = useState(false);
@@ -316,8 +323,107 @@ const StudentViewBatch = () => {
           </div>
         </div>
 
+        <div className="d-lg-none">
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status"></div>
+              <p className="mt-2 text-muted">Loading your batches...</p>
+            </div>
+          ) : filteredBatches.length > 0 ? (
+            <div className="row g-3">
+              {filteredBatches.map((batch) => (
+                <div key={batch._id} className="col-12 col-md-6">
+                  <div
+                    className="h-100 border rounded-4 bg-white shadow-sm p-3"
+                    style={{ borderColor: "#e9ecef" }}
+                  >
+                    <div className="d-flex justify-content-between align-items-start gap-3 mb-3">
+                      <div className="min-w-0">
+                        <h6 className="fw-bold text-dark mb-1">{batch.batch_name}</h6>
+                        <p className="text-muted small mb-0">
+                          {batch.course_id?.course_title || "Course not assigned"}
+                        </p>
+                      </div>
+                      <span className={`badge rounded-pill ${getStatusClass(batch.status)}`}>
+                        {batch.status}
+                      </span>
+                    </div>
+
+                    <div className="d-flex flex-column gap-3 small">
+                      <div>
+                        <div className="text-muted mb-1">Instructor(s)</div>
+                        <div className="d-flex align-items-center gap-2">
+                          <div
+                            className="avatar-placeholder bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                            style={{ width: "32px", height: "32px" }}
+                          >
+                            <FaUser size={12} />
+                          </div>
+                          <span className="fw-semibold text-dark">{getInstructors(batch)}</span>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-muted mb-1">Schedule</div>
+                        <div className="fw-semibold text-dark">
+                          <FaClock className="me-1 text-primary" />
+                          {batch.batch_time || "Time TBD"}
+                        </div>
+                        <div className="text-muted mt-1">
+                          {Array.isArray(batch.recurring_days) && batch.recurring_days.length > 0
+                            ? batch.recurring_days.map((d) => d.slice(0, 3)).join(", ")
+                            : "Days TBD"}
+                        </div>
+                      </div>
+
+                      <div className="row g-2">
+                        <div className="col-6">
+                          <div className="text-muted mb-1">Start</div>
+                          <div className="fw-semibold text-dark">{formatDate(batch.start_date)}</div>
+                        </div>
+                        <div className="col-6">
+                          <div className="text-muted mb-1">End</div>
+                          <div className="fw-semibold text-dark">{formatDate(batch.end_date)}</div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="text-muted">Progress</span>
+                          <span className="fw-semibold text-dark">{batch.progress || 0}%</span>
+                        </div>
+                        <div className="progress" style={{ height: "7px" }}>
+                          <div
+                            className="progress-bar bg-primary"
+                            style={{ width: `${batch.progress || 0}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div className="d-flex flex-column gap-2 pt-1">
+                        <div>{renderJoinButton(batch)}</div>
+                        <div className="d-flex justify-content-end align-items-center gap-2">
+                          <button
+                            className="btn btn-outline-dark btn-sm rounded-pill px-3"
+                            onClick={() => handleViewRecordings(batch)}
+                          >
+                            <FaPlay className="me-1" size={12} />
+                            Recordings
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-5 text-muted">No batches found.</div>
+          )}
+        </div>
+
         {/* Table View */}
-        <div className="table-responsive">
+        <div className="table-responsive d-none d-lg-block">
           <table className="table table-hover align-middle custom-table">
             <thead className="bg-light">
               <tr>
@@ -364,12 +470,12 @@ const StudentViewBatch = () => {
                     </td>
                     <td>
                       <div className="d-flex flex-column small text-muted">
-                        <span>Start: {new Date(batch.start_date).toLocaleDateString()}</span>
-                        <span>End: {new Date(batch.end_date).toLocaleDateString()}</span>
+                        <span>Start: {formatDate(batch.start_date)}</span>
+                        <span>End: {formatDate(batch.end_date)}</span>
                       </div>
                     </td>
                     <td>
-                      <span className={`badge rounded-pill ${batch.status === 'active' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
+                      <span className={`badge rounded-pill ${getStatusClass(batch.status)}`}>
                         {batch.status}
                       </span>
                     </td>

@@ -29,4 +29,12 @@ export const attendanceService = {
         });
         return response.data;
     },
+
+    downloadCourseBatchPDF: async (params) => {
+        const response = await api.get("/attendance/course-batch-pdf", {
+            params,
+            responseType: "blob",
+        });
+        return response.data;
+    },
 };

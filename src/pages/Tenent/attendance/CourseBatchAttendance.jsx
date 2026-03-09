@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import api from '@/api/axiosInstance';
+import './attendance-dashboard.css';
+
+const performanceTone = (value) => {
+  if (value >= 85) return { label: 'Excellent', className: 'success' };
+  if (value >= 65) return { label: 'Stable', className: 'warning' };
+  return { label: 'Needs Attention', className: 'danger' };
+};
 
 const CourseBatchAttendance = () => {
   const [courses, setCourses] = useState([]);
@@ -14,7 +21,7 @@ const CourseBatchAttendance = () => {
     endDate: new Date().toISOString().split('T')[0]
   });
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  const COLORS = ['#0f766e', '#f59e0b', '#dc2626'];
 
   useEffect(() => {
     fetchCourses();
@@ -79,17 +86,12 @@ const CourseBatchAttendance = () => {
 
   const downloadPDF = async () => {
     try {
-      // For course-batch view, we'll use the monthly PDF endpoint with the start date's month
-      const startDate = new Date(dateRange.startDate);
-      const month = startDate.getMonth() + 1;
-      const year = startDate.getFullYear();
-
-      const response = await api.get('/attendance/monthly-pdf', {
+      const response = await api.get('/attendance/course-batch-pdf', {
         params: {
           course_id: selectedCourse,
           batch_id: selectedBatch,
-          month: month,
-          year: year
+          start_date: dateRange.startDate,
+          end_date: dateRange.endDate
         },
         responseType: 'blob' // Important for downloading files
       });
@@ -98,7 +100,7 @@ const CourseBatchAttendance = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      const fileName = `course-batch-attendance-${selectedCourse}-${selectedBatch}-${month}-${year}.pdf`;
+      const fileName = `course-batch-attendance-${dateRange.startDate}-${dateRange.endDate}.pdf`;
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
@@ -132,6 +134,29 @@ const CourseBatchAttendance = () => {
     ? (overallStats.attended / overallStats.totalClasses) * 100 
     : 0;
 
+  const punctualityRate = overallStats.attended > 0
+    ? (overallStats.present / overallStats.attended) * 100
+    : 0;
+
+  const averageClassesPerStudent = attendanceData.length > 0
+    ? overallStats.totalClasses / attendanceData.length
+    : 0;
+
+  const rankedStudents = [...attendanceData].sort(
+    (a, b) => b.summary.attendance_percentage - a.summary.attendance_percentage
+  );
+  const topPerformer = rankedStudents[0];
+  const atRiskStudents = attendanceData.filter(
+    (student) => Number(student.summary.attendance_percentage || 0) < 50
+  );
+
+  const selectedCourseName = courses.find((course) => course._id === selectedCourse)?.course_title || 'Not selected';
+  const selectedBatchName = batches.find((batch) => batch._id === selectedBatch)?.batch_name || 'Not selected';
+  const dateSpanDays = Math.max(
+    1,
+    Math.round((new Date(dateRange.endDate) - new Date(dateRange.startDate)) / (1000 * 60 * 60 * 24)) + 1
+  );
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
@@ -143,15 +168,32 @@ const CourseBatchAttendance = () => {
   }
 
   return (
-    <div className="modern-layout-content p-4">
-      <div className="mb-4">
-        <h2 className="fw-bold">Course & Batch Attendance</h2>
-        <p className="text-muted">View attendance statistics by course and batch</p>
+    <div className="modern-layout-content p-4 attendance-dashboard-page course-batch-report-page">
+      <div className="modern-card course-batch-hero">
+        <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+          <div>
+            <span className="course-batch-kicker">Attendance Intelligence</span>
+            <h2 className="fw-bold mb-2">Course & Batch Attendance Report</h2>
+            <p className="mb-0 course-batch-hero-copy">
+              Review participation trends, identify low-attendance learners early, and export a cleaner report for your team.
+            </p>
+          </div>
+          <div className="course-batch-hero-meta">
+            <div>
+              <span>Range</span>
+              <strong>{dateRange.startDate} to {dateRange.endDate}</strong>
+            </div>
+            <div>
+              <span>Window</span>
+              <strong>{dateSpanDays} day{dateSpanDays === 1 ? '' : 's'}</strong>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="row mb-4">
-        <div className="col-md-3">
+      <div className="modern-card attendance-filter-card">
+        <div className="row g-3 align-items-end">
+          <div className="col-md-3">
           <label className="form-label">Select Course</label>
           <select
             className="form-select"
@@ -168,8 +210,8 @@ const CourseBatchAttendance = () => {
               </option>
             ))}
           </select>
-        </div>
-        <div className="col-md-3">
+          </div>
+          <div className="col-md-3">
           <label className="form-label">Select Batch</label>
           <select
             className="form-select"
@@ -184,8 +226,8 @@ const CourseBatchAttendance = () => {
               </option>
             ))}
           </select>
-        </div>
-        <div className="col-md-3">
+          </div>
+          <div className="col-md-3">
           <label className="form-label">Start Date</label>
           <input
             type="date"
@@ -193,8 +235,8 @@ const CourseBatchAttendance = () => {
             value={dateRange.startDate}
             onChange={(e) => setDateRange({...dateRange, startDate: e.target.value})}
           />
-        </div>
-        <div className="col-md-3">
+          </div>
+          <div className="col-md-3">
           <label className="form-label">End Date</label>
           <input
             type="date"
@@ -202,80 +244,79 @@ const CourseBatchAttendance = () => {
             value={dateRange.endDate}
             onChange={(e) => setDateRange({...dateRange, endDate: e.target.value})}
           />
+          </div>
         </div>
       </div>
 
-      {/* Action Button */}
-      <div className="row mb-4">
-        <div className="col-md-12">
+      <div className="modern-card attendance-context-card">
+        <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div>
+            <h6 className="fw-bold mb-1">Current Report Scope</h6>
+            <p className="mb-0 text-muted small">
+              {selectedCourseName} | {selectedBatchName}
+            </p>
+          </div>
           <button 
-            className="btn btn-success"
+            className="btn btn-success rounded-pill px-4"
             onClick={downloadPDF}
             disabled={attendanceData.length === 0}
           >
             <i className="fa-solid fa-download me-2"></i>
-            Download Course & Batch Attendance PDF
+            Download Detailed PDF
           </button>
         </div>
       </div>
 
       {selectedCourse && selectedBatch && (
         <>
-          {/* Summary Cards */}
-          <div className="row mb-4">
-            <div className="col-md-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body text-center">
-                  <div className="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '60px', height: '60px' }}>
-                    <i className="fa-solid fa-users text-primary fs-3"></i>
-                  </div>
-                  <h3 className="fw-bold mb-1">{attendanceData.length}</h3>
-                  <p className="text-muted mb-0">Students</p>
-                </div>
+          <div className="attendance-stat-grid">
+            <div className="modern-card attendance-stat-card primary">
+              <div className="attendance-stat-icon">
+                <i className="fa-solid fa-users"></i>
+              </div>
+              <div>
+                <h4 className="fw-bold mb-1">{attendanceData.length}</h4>
+                <p className="text-muted mb-0 small">Students in Report</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body text-center">
-                  <div className="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '60px', height: '60px' }}>
-                    <i className="fa-solid fa-calendar-day text-info fs-3"></i>
-                  </div>
-                  <h3 className="fw-bold mb-1">{overallStats.totalClasses}</h3>
-                  <p className="text-muted mb-0">Total Classes</p>
-                </div>
+            <div className="modern-card attendance-stat-card info">
+              <div className="attendance-stat-icon">
+                <i className="fa-solid fa-calendar-day"></i>
+              </div>
+              <div>
+                <h4 className="fw-bold mb-1">{overallStats.totalClasses}</h4>
+                <p className="text-muted mb-0 small">Total Class Records</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body text-center">
-                  <div className="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '60px', height: '60px' }}>
-                    <i className="fa-solid fa-check-circle text-success fs-3"></i>
-                  </div>
-                  <h3 className="fw-bold mb-1">{overallStats.attended}</h3>
-                  <p className="text-muted mb-0">Attended</p>
-                </div>
+            <div className="modern-card attendance-stat-card success">
+              <div className="attendance-stat-icon">
+                <i className="fa-solid fa-check-circle"></i>
+              </div>
+              <div>
+                <h4 className="fw-bold mb-1">{overallAttendanceRate.toFixed(1)}%</h4>
+                <p className="text-muted mb-0 small">Overall Attendance Rate</p>
               </div>
             </div>
-            <div className="col-md-3">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body text-center">
-                  <div className="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '60px', height: '60px' }}>
-                    <i className="fa-solid fa-percentage text-secondary fs-3"></i>
-                  </div>
-                  <h3 className="fw-bold mb-1">{overallAttendanceRate.toFixed(2)}%</h3>
-                  <p className="text-muted mb-0">Attendance Rate</p>
-                </div>
+            <div className="modern-card attendance-stat-card secondary">
+              <div className="attendance-stat-icon">
+                <i className="fa-solid fa-stopwatch"></i>
+              </div>
+              <div>
+                <h4 className="fw-bold mb-1">{punctualityRate.toFixed(1)}%</h4>
+                <p className="text-muted mb-0 small">Punctuality Among Attendees</p>
               </div>
             </div>
           </div>
 
-          {/* Charts Row */}
-          <div className="row mb-4">
-            {/* Student Attendance Chart */}
-            <div className="col-lg-8">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body">
-                  <h5 className="card-title">Student Attendance Percentage</h5>
+          <div className="attendance-chart-grid">
+            <div className="modern-card">
+              <div className="d-flex justify-content-between align-items-center mb-3 gap-3">
+                <div>
+                  <h5 className="card-title mb-1">Student Attendance Percentage</h5>
+                  <p className="text-muted small mb-0">Quick comparison across the selected date range</p>
+                </div>
+                <span className="course-batch-chip">{averageClassesPerStudent.toFixed(1)} avg classes/student</span>
+              </div>
                   <ResponsiveContainer width="100%" height={400}>
                     <BarChart data={studentAttendanceData}>
                       <CartesianGrid strokeDasharray="3 3" />
@@ -283,18 +324,14 @@ const CourseBatchAttendance = () => {
                       <YAxis domain={[0, 100]} />
                       <Tooltip formatter={(value) => [`${value}%`, 'Attendance']} />
                       <Legend />
-                      <Bar dataKey="attendance_percentage" name="Attendance %" fill="#8884d8" />
+                      <Bar dataKey="attendance_percentage" name="Attendance %" fill="#0f5ab8" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
-              </div>
             </div>
 
-            {/* Overall Status Distribution Chart */}
-            <div className="col-lg-4">
-              <div className="card border-0 shadow-sm h-100">
-                <div className="card-body">
-                  <h5 className="card-title">Overall Status Distribution</h5>
+            <div className="modern-card">
+              <h5 className="card-title mb-1">Overall Status Distribution</h5>
+              <p className="text-muted small mb-3">Present, late, and absent records in the current report</p>
                   <ResponsiveContainer width="100%" height={300}>
                     <PieChart>
                       <Pie
@@ -311,39 +348,70 @@ const CourseBatchAttendance = () => {
                         dataKey="value"
                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                       >
-                        <Cell fill="#00C49F" />
-                        <Cell fill="#FFBB28" />
-                        <Cell fill="#FF8042" />
+                        {COLORS.map((fill) => (
+                          <Cell key={fill} fill={fill} />
+                        ))}
                       </Pie>
                       <Tooltip />
                     </PieChart>
                   </ResponsiveContainer>
-                </div>
+              <div className="course-batch-distribution-legend">
+                <span><i style={{ backgroundColor: COLORS[0] }}></i>Present</span>
+                <span><i style={{ backgroundColor: COLORS[1] }}></i>Late</span>
+                <span><i style={{ backgroundColor: COLORS[2] }}></i>Absent</span>
               </div>
             </div>
           </div>
 
-          {/* Student Details Table */}
-          <div className="card border-0 shadow-sm">
-            <div className="card-body">
-              <h5 className="card-title">Student Attendance Details</h5>
-              
+          <div className="course-batch-insights-grid">
+            <div className="modern-card course-batch-insight-card">
+              <div className="course-batch-insight-label">Top Performer</div>
+              <h5 className="fw-bold mb-1">
+                {topPerformer ? `${topPerformer.student.fname} ${topPerformer.student.lname}` : 'No data'}
+              </h5>
+              <p className="text-muted mb-0">
+                {topPerformer ? `${Number(topPerformer.summary.attendance_percentage).toFixed(1)}% attendance with ${topPerformer.summary.attended}/${topPerformer.summary.total_classes} attended classes.` : 'No attendance records in the selected period.'}
+              </p>
+            </div>
+            <div className="modern-card course-batch-insight-card">
+              <div className="course-batch-insight-label">Needs Attention</div>
+              <h5 className="fw-bold mb-1">{atRiskStudents.length}</h5>
+              <p className="text-muted mb-0">
+                Students below 50% attendance in this report window.
+              </p>
+            </div>
+          </div>
+
+          <div className="modern-card">
+            <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+              <div>
+                <h5 className="card-title mb-1">Student Attendance Details</h5>
+                <p className="text-muted small mb-0">Detailed breakdown for review and follow-up</p>
+              </div>
+            </div>
               <div className="table-responsive">
-                <table className="table table-hover">
+                <table className="table table-hover attendance-table">
                   <thead>
                     <tr>
+                      <th>Rank</th>
                       <th>Student Name</th>
                       <th>Total Classes</th>
                       <th>Attended</th>
                       <th>Present</th>
                       <th>Late</th>
                       <th>Absent</th>
+                      <th>Performance</th>
                       <th>Attendance %</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {attendanceData.map((student, index) => (
+                    {rankedStudents.map((student, index) => {
+                      const tone = performanceTone(Number(student.summary.attendance_percentage || 0));
+                      return (
                       <tr key={index}>
+                        <td>
+                          <span className="course-batch-rank-badge">#{index + 1}</span>
+                        </td>
                         <td>
                           {student.student.fname} {student.student.lname}
                           <br />
@@ -361,26 +429,28 @@ const CourseBatchAttendance = () => {
                           <span className="badge bg-danger">{student.summary.absent}</span>
                         </td>
                         <td>
+                          <span className={`badge text-bg-${tone.className}`}>{tone.label}</span>
+                        </td>
+                        <td>
                           <div className="d-flex align-items-center">
-                            <span className="fw-bold me-2">{student.summary.attendance_percentage}%</span>
+                            <span className="fw-bold me-2">{Number(student.summary.attendance_percentage || 0).toFixed(1)}%</span>
                             <div className="progress flex-grow-1" style={{ height: '10px' }}>
                               <div 
                                 className="progress-bar" 
                                 style={{ 
                                   width: `${student.summary.attendance_percentage}%`,
-                                  backgroundColor: student.summary.attendance_percentage >= 75 ? '#28a745' : 
-                                                  student.summary.attendance_percentage >= 50 ? '#ffc107' : '#dc3545'
+                                  backgroundColor: student.summary.attendance_percentage >= 75 ? '#16a34a' : 
+                                                  student.summary.attendance_percentage >= 50 ? '#f59e0b' : '#dc2626'
                                 }}
                               ></div>
                             </div>
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                   </tbody>
                 </table>
               </div>
-            </div>
           </div>
         </>
       )}

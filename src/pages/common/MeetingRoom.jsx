@@ -6,6 +6,9 @@ import api from "@/api/axiosInstance";
 import moment from 'moment';
 
 const MeetingRoom = () => {
+    const autoEndTimeoutMinutes = parseInt(import.meta.env.VITE_MEETING_AUTO_END_TIMEOUT_MINUTES || '5', 10);
+    const autoEndTimeoutSeconds = Math.max(1, autoEndTimeoutMinutes * 60);
+
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const authToken = searchParams.get('authToken');
@@ -18,11 +21,13 @@ const MeetingRoom = () => {
     const [countdown, setCountdown] = useState(5);
     const endSentRef = useRef(false);
     const hostJoinSentRef = useRef(false);
+    const autoEndTimeoutRef = useRef(null);
 
     // Timing states
     const [batchData, setBatchData] = useState(null);
     const [showWarning, setShowWarning] = useState(false);
     const [showOvertime, setShowOvertime] = useState(false);
+    const [autoEndCountdown, setAutoEndCountdown] = useState(autoEndTimeoutSeconds);
     const warningShownRef = useRef(false);
     const overtimeShownRef = useRef(false);
 
@@ -171,6 +176,37 @@ const MeetingRoom = () => {
         }
     }, [hasEnded]);
 
+    useEffect(() => {
+        if (!showOvertime || hasEnded) {
+            setAutoEndCountdown(autoEndTimeoutSeconds);
+            if (autoEndTimeoutRef.current) {
+                clearInterval(autoEndTimeoutRef.current);
+                autoEndTimeoutRef.current = null;
+            }
+            return;
+        }
+
+        setAutoEndCountdown(autoEndTimeoutSeconds);
+        autoEndTimeoutRef.current = setInterval(() => {
+            setAutoEndCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(autoEndTimeoutRef.current);
+                    autoEndTimeoutRef.current = null;
+                    handleEndClassAtTime();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => {
+            if (autoEndTimeoutRef.current) {
+                clearInterval(autoEndTimeoutRef.current);
+                autoEndTimeoutRef.current = null;
+            }
+        };
+    }, [showOvertime, hasEnded, autoEndTimeoutSeconds]);
+
     const handleExit = () => {
         if (window.opener) {
             window.close();
@@ -192,6 +228,13 @@ const MeetingRoom = () => {
             setHasEnded(true);
         }
     };
+
+    const handleContinueClass = () => {
+        setShowOvertime(false);
+    };
+
+    const autoEndMinutes = Math.floor(autoEndCountdown / 60);
+    const autoEndSeconds = String(autoEndCountdown % 60).padStart(2, '0');
 
     if (!authToken) {
         return (
@@ -325,9 +368,12 @@ const MeetingRoom = () => {
                                     </div>
                                     <p className="fs-5 mb-1">The scheduled class time has ended.</p>
                                     <p className="text-muted">Do you want to continue the session or end it now?</p>
+                                    <p className="fw-semibold text-danger mb-0">
+                                        If there is no response, the class will end automatically in {autoEndMinutes}:{autoEndSeconds}.
+                                    </p>
                                 </div>
                                 <div className="modal-footer border-0 pb-4 px-4 justify-content-center gap-3">
-                                    <button type="button" className="btn btn-outline-secondary px-4 py-2" onClick={() => setShowOvertime(false)} style={{ borderRadius: '10px' }}>
+                                    <button type="button" className="btn btn-outline-secondary px-4 py-2" onClick={handleContinueClass} style={{ borderRadius: '10px' }}>
                                         Continue Class
                                     </button>
                                     <button type="button" className="btn btn-danger px-4 py-2 fw-bold" onClick={handleEndClassAtTime} style={{ borderRadius: '10px' }}>

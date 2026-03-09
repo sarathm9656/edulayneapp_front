@@ -3,6 +3,129 @@
   gap: 16px;
 }
 
+.course-batch-report-page {
+  --report-navy: #10233f;
+  --report-blue: #0f5ab8;
+  --report-mist: #eef4ff;
+  --report-ink: #21324a;
+}
+
+.course-batch-hero {
+  padding: 22px;
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.28), transparent 34%),
+    linear-gradient(135deg, #10233f 0%, #183b6b 58%, #245a9a 100%);
+  color: #fff;
+  border: none;
+}
+
+.course-batch-kicker {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.course-batch-hero-copy {
+  max-width: 720px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.course-batch-hero-meta {
+  display: grid;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.course-batch-hero-meta div {
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.course-batch-hero-meta span {
+  display: block;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.course-batch-hero-meta strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.course-batch-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--report-blue);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.course-batch-distribution-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  color: #5f6b7a;
+  font-size: 0.9rem;
+}
+
+.course-batch-distribution-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.course-batch-distribution-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.course-batch-insights-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.course-batch-insight-card {
+  padding: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+}
+
+.course-batch-insight-label {
+  margin-bottom: 8px;
+  color: var(--report-blue);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.course-batch-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--report-mist);
+  color: var(--report-blue);
+  font-weight: 700;
+}
+
 .attendance-header-card,
 .attendance-filter-card,
 .attendance-context-card {
@@ -126,10 +249,22 @@
   .attendance-chart-grid {
     grid-template-columns: 1fr;
   }
+
+  .course-batch-insights-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
   .attendance-stat-grid {
     grid-template-columns: 1fr;
+  }
+
+  .course-batch-hero {
+    padding: 18px;
+  }
+
+  .course-batch-hero-meta {
+    min-width: 100%;
   }
 }

@@ -852,16 +852,44 @@ const TenantBatches = () => {
         { courseStudents: newBatchStudents }
       );
 
-      if (response.data.success) {
-        toast.success(`${selectedForAdd.length} student(s) added successfully`);
-        setEnrollmentMode('list');
-        setBatchStudents(newBatchStudents);
-        setAllStudents(prev => prev.map(s => selectedForAdd.includes(s.login_id) ? { ...s, isEnrolled: true } : s));
-        dispatch(fetchBatches());
+      const {
+        success,
+        enrolled_students = [],
+        skipped_students = [],
+        unenrolled_count = 0,
+        errors = [],
+        message: apiMessage,
+      } = response.data;
+
+      if (!success) {
+        toast.error(errors[0] || apiMessage || "No students were added to the batch");
+        return;
       }
+
+      let toastMessage = "Batch enrollment updated successfully!";
+      if (enrolled_students.length > 0) {
+        toastMessage += ` ${enrolled_students.length} new student(s) enrolled.`;
+      }
+      if (skipped_students.length > 0) {
+        toastMessage += ` ${skipped_students.length} student(s) already enrolled.`;
+      }
+      if (unenrolled_count > 0) {
+        toastMessage += ` ${unenrolled_count} student(s) unenrolled.`;
+      }
+
+      if (errors.length > 0) {
+        toast.warn(`${toastMessage} ${errors.join(" ")}`);
+      } else {
+        toast.success(toastMessage);
+      }
+
+      setEnrollmentMode("list");
+      setSelectedForAdd([]);
+      await fetchStudentsForBatch(enrollingBatch);
+      dispatch(fetchBatches());
     } catch (error) {
       console.error("Error adding students:", error);
-      toast.error("Failed to add students");
+      toast.error(error.response?.data?.message || "Failed to add students");
     } finally {
       setEnrollmentLoading(false);
     }
@@ -931,9 +959,21 @@ const TenantBatches = () => {
         { courseStudents: batchStudents }
       );
 
-      if (response.data.success) {
-        const { enrolled_students, skipped_students, unenrolled_count } =
-          response.data;
+      const {
+        success,
+        enrolled_students = [],
+        skipped_students = [],
+        unenrolled_count = 0,
+        errors = [],
+        message: apiMessage,
+      } = response.data;
+
+      if (!success) {
+        toast.error(errors[0] || apiMessage || "No students were added to the batch");
+        return;
+      }
+
+      if (success) {
         let message = "Batch enrollment updated successfully!";
 
         if (enrolled_students.length > 0) {
@@ -946,7 +986,11 @@ const TenantBatches = () => {
           message += ` ${unenrolled_count} student(s) unenrolled.`;
         }
 
-        toast.success(message);
+        if (errors.length > 0) {
+          toast.warn(`${message} ${errors.join(" ")}`);
+        } else {
+          toast.success(message);
+        }
         setShowEnrollModal(false);
         setEnrollingBatch(null);
         setBatchStudents([]);

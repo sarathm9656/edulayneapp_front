@@ -15,6 +15,7 @@ import CreateCategoryModal from "../../../components/tenants/CreateCategoryModal
 import CreateLanguageModal from "../../../components/tenants/CreateLanguageModal";
 import CreateLevelModal from "../../../components/tenants/CreateLevelModal";
 import api from "@/api/axiosInstance";
+import { applyCourseImageFallback, resolveCourseImageUrl } from "@/utils/courseImage";
 
 const EditCoursePage = () => {
     const { id } = useParams();
@@ -83,7 +84,7 @@ const EditCoursePage = () => {
                 });
 
                 if (course.image) {
-                    setImagePreview(`${import.meta.env.VITE_API_URL}/uploads/courses/${course.image}`);
+                    setImagePreview(resolveCourseImageUrl(course.image, import.meta.env.VITE_API_URL));
                 }
 
                 dispatch(fetchCategories());
@@ -434,6 +435,7 @@ const EditCoursePage = () => {
                                         src={imagePreview || "/img/chessthumbnail.jpg"}
                                         className="w-100 h-100 object-fit-cover"
                                         alt="Preview"
+                                        onError={applyCourseImageFallback}
                                     />
                                     <label htmlFor="courseImgUpload" className="image-upload-overlay">
                                         <div className="text-center text-white">

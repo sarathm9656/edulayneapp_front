@@ -40,7 +40,25 @@ const ParticipantEventsTable = ({ title, data }) => {
 
     const getEmail = (row) => row?.login_id?.email || row?.login_id?.user_id?.email || row?.participant_email || '';
 
-    const getRoleLabel = (row) => row?.app_role || row?.preset_name || 'participant';
+    const getRoleLabel = (row) => {
+        const appUserRole = String(
+            row?.login_id?.user_id?.role ||
+            row?.app_role ||
+            ''
+        ).trim().toLowerCase();
+
+        if (appUserRole === 'student') return 'Student';
+        if (appUserRole === 'instructor') return 'Instructor';
+        if (appUserRole === 'tenant') return 'Tenant';
+        if (appUserRole === 'superadmin') return 'Super Admin';
+        if (appUserRole) return appUserRole.charAt(0).toUpperCase() + appUserRole.slice(1);
+
+        const preset = String(row?.preset_name || '').trim().toLowerCase();
+        if (preset.includes('host')) return 'Instructor';
+        if (preset.includes('participant')) return 'Student';
+
+        return 'Student';
+    };
 
     return (
         <div style={{ background: 'white', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
@@ -49,8 +67,8 @@ const ParticipantEventsTable = ({ title, data }) => {
                     <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold', color: '#111827' }}>{title}</h3>
                 </div>
             )}
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: '900px', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
                             <th style={thStyle}>Time</th>
@@ -100,7 +118,7 @@ const ParticipantEventsTable = ({ title, data }) => {
                                         <span style={{ fontSize: '12px', fontWeight: '800', color: '#4f46e5' }}>{getRoleLabel(row)}</span>
                                     </td>
                                     <td style={tdStyle}>
-                                        <div style={{ fontWeight: '600' }}>{row?.batch_id?.batch_name || '—'}</div>
+                                        <div style={{ fontWeight: '600' }}>{row?.batch_id?.batch_name || 'â€”'}</div>
                                     </td>
                                     <td style={tdStyle}>
                                         <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#6b7280' }}>
@@ -123,4 +141,3 @@ const ParticipantEventsTable = ({ title, data }) => {
 };
 
 export default ParticipantEventsTable;
-

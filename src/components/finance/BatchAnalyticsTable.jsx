@@ -34,8 +34,8 @@ const BatchAnalyticsTable = ({ data, periodLabel }) => {
                     {periodLabel || 'This Month'}
                 </div>
             </div>
-            <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', minWidth: '680px', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ background: '#f8fafc' }}>
                             <th style={thStyle}>Batch</th>

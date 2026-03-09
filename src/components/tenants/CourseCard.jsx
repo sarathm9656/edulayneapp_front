@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { applyCourseImageFallback, resolveCourseImageUrl } from "@/utils/courseImage";
 
 const CourseCard = ({ course }) => {
 
@@ -8,8 +9,7 @@ const CourseCard = ({ course }) => {
   const api_url = useMemo(() => import.meta.env.VITE_API_URL, []);
 
   const imageSrc = useMemo(() => {
-    if (!image) return "/img/chessthumbnail.jpg";
-    return `${api_url}/uploads/courses/${image}`;
+    return resolveCourseImageUrl(image, api_url);
   }, [image, api_url]);
 
   return (
@@ -19,6 +19,7 @@ const CourseCard = ({ course }) => {
           src={imageSrc}
           alt={course_title}
           className="w-100 h-100 object-fit-cover transition-all"
+          onError={applyCourseImageFallback}
         />
         <div className="position-absolute top-0 end-0 p-3 d-flex gap-2">
           {course.end_date && new Date(course.end_date) < new Date() ? (
