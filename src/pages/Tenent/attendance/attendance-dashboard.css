@@ -126,6 +126,22 @@
   font-weight: 700;
 }
 
+.course-batch-download-btn {
+  white-space: nowrap;
+}
+
+.course-batch-chart-card {
+  min-width: 0;
+}
+
+.course-batch-table-wrap {
+  width: 100%;
+}
+
+.course-batch-progress-cell {
+  min-width: 160px;
+}
+
 .attendance-header-card,
 .attendance-filter-card,
 .attendance-context-card {
@@ -253,9 +269,17 @@
   .course-batch-insights-grid {
     grid-template-columns: 1fr;
   }
+
+  .course-batch-hero-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
+  .attendance-dashboard-page.course-batch-report-page {
+    gap: 12px;
+  }
+
   .attendance-stat-grid {
     grid-template-columns: 1fr;
   }
@@ -266,5 +290,129 @@
 
   .course-batch-hero-meta {
     min-width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-filter-card,
+  .attendance-context-card,
+  .course-batch-insight-card {
+    padding: 16px;
+  }
+
+  .course-batch-download-btn {
+    width: 100%;
+  }
+
+  .course-batch-chart-card .card-title,
+  .course-batch-insight-card h5 {
+    word-break: break-word;
+  }
+
+  .course-batch-chart-card .recharts-responsive-container {
+    min-height: 280px;
+  }
+
+  .course-batch-table-wrap {
+    overflow: visible;
+    max-height: none;
+  }
+
+  .course-batch-table thead {
+    display: none;
+  }
+
+  .course-batch-table,
+  .course-batch-table tbody,
+  .course-batch-table tr,
+  .course-batch-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .course-batch-table tr {
+    margin-bottom: 12px;
+    padding: 14px;
+    border: 1px solid #e6ebf3;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(15, 90, 184, 0.08);
+  }
+
+  .course-batch-table td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border: 0;
+    border-bottom: 1px solid #eef2f7;
+    text-align: right;
+  }
+
+  .course-batch-table td:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .course-batch-table td::before {
+    content: attr(data-label);
+    flex: 0 0 110px;
+    color: #5f6b7a;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-align: left;
+  }
+
+  .course-batch-table td[data-label="Student Name"] {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .course-batch-table td[data-label="Student Name"]::before {
+    flex-basis: auto;
+  }
+
+  .course-batch-table td[data-label="Attendance %"] {
+    align-items: stretch;
+  }
+
+  .course-batch-progress-cell {
+    width: 100%;
+    min-width: 0;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 576px) {
+  .course-batch-hero {
+    padding: 16px;
+  }
+
+  .course-batch-kicker {
+    font-size: 0.72rem;
+  }
+
+  .course-batch-hero h2 {
+    font-size: 1.4rem;
+  }
+
+  .course-batch-hero-copy {
+    font-size: 0.92rem;
+  }
+
+  .course-batch-table td {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .course-batch-table td::before {
+    flex-basis: auto;
+  }
+
+  .course-batch-progress-cell {
+    justify-content: flex-start;
   }
 }

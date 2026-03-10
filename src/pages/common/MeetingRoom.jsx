@@ -15,6 +15,7 @@ const MeetingRoom = () => {
     const role = searchParams.get('role'); // 'tenant', 'instructor', 'student'
     const batchId = searchParams.get('batchId');
     const meetingId = searchParams.get('meetingId');
+    const isPublicJoin = searchParams.get('public') === '1';
 
     const [meeting, initMeeting] = useDyteClient();
     const [hasEnded, setHasEnded] = useState(false);
@@ -48,7 +49,7 @@ const MeetingRoom = () => {
 
     // Fetch batch info
     useEffect(() => {
-        if (batchId && (role === 'instructor' || role === 'tenant' || role === 'superadmin')) {
+        if (!isPublicJoin && batchId && (role === 'instructor' || role === 'tenant' || role === 'superadmin')) {
             const fetchBatch = async () => {
                 try {
                     const response = await api.get(`/batch/${batchId}`);
@@ -61,7 +62,7 @@ const MeetingRoom = () => {
             };
             fetchBatch();
         }
-    }, [batchId, role]);
+    }, [batchId, role, isPublicJoin]);
 
     // Timer logic for popups
     useEffect(() => {
@@ -106,6 +107,7 @@ const MeetingRoom = () => {
 
         const markHostJoin = async () => {
             const normalizedRole = String(role || '').toLowerCase().trim();
+            if (isPublicJoin) return;
             if (!['instructor', 'tenant', 'superadmin'].includes(normalizedRole)) return;
             if (!meetingId) return;
             if (hostJoinSentRef.current) return;
@@ -119,7 +121,7 @@ const MeetingRoom = () => {
         };
 
         const markStudentLeave = async () => {
-            if (role !== 'student' || !batchId) return;
+            if (isPublicJoin || role !== 'student' || !batchId) return;
             try {
                 await api.post('/dyte/leave-meeting', { batchId });
             } catch (err) {
@@ -129,6 +131,7 @@ const MeetingRoom = () => {
 
         const endMeetingForHost = async () => {
             const normalizedRole = String(role || '').toLowerCase().trim();
+            if (isPublicJoin) return;
             if (!['instructor', 'tenant', 'superadmin'].includes(normalizedRole)) return;
             if (!meetingId) return;
             if (endSentRef.current) return;
@@ -156,7 +159,7 @@ const MeetingRoom = () => {
             meeting.self.removeListener('roomJoined', markHostJoin);
             meeting.self.removeListener('roomLeft', handleMeetingEnd);
         };
-    }, [meeting, role, batchId, meetingId]);
+    }, [meeting, role, batchId, meetingId, isPublicJoin]);
 
     // Handle Redirect Timer
     useEffect(() => {
@@ -212,8 +215,10 @@ const MeetingRoom = () => {
             window.close();
         } else {
             // Fallback navigation if not opened in a popup
-            if (role === 'instructor' || role === 'tenant') {
+            if (role === 'instructor' || role === 'tenant' || role === 'superadmin' || role === 'admin') {
                 navigate('/instructor/batches');
+            } else if (isPublicJoin) {
+                navigate('/');
             } else {
                 navigate('/student/batches');
             }

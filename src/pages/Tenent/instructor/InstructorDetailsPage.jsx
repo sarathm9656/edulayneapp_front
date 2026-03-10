@@ -40,16 +40,19 @@ const InstructorDetailsPage = () => {
   useEffect(() => {
     if (instructorId) {
       setLoading(true);
-      dispatch(fetchInstructorById(instructorId));
+      dispatch(fetchInstructorById(instructorId))
+        .unwrap()
+        .catch((error) => {
+          console.error("Failed to fetch instructor details:", error);
+          toast.error(
+            error?.message || "Failed to load instructor details"
+          );
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [instructorId, dispatch]);
-
-  // When instructorDetails is loaded, set loading to false
-  useEffect(() => {
-    if (instructorDetails && instructorDetails.user && instructorDetails.user._id) {
-      setLoading(false);
-    }
-  }, [instructorDetails]);
 
   const handleEdit = () => {
     setOpenEditInstructorModal(true);
@@ -204,21 +207,7 @@ const InstructorDetailsPage = () => {
             <div className="row mb-4">
               <div className="col-12">
                 <div className="d-flex justify-content-between align-items-center">
-                  <div className="d-flex align-items-center">
-                    <button
-                      onClick={handleBack}
-                      className="btn btn-outline-secondary me-3"
-                      style={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        border: 'none',
-                        color: 'white',
-                        borderRadius: '8px',
-                        padding: '8px 16px'
-                      }}
-                    >
-                      <FaArrowLeft className="me-2" />
-                      Back
-                    </button>
+                  <div>
                     <div>
                       <h2 className="mb-1" style={{ color: 'var(--HeadingColor)', fontWeight: 'bold' }}>
                         Instructor Details

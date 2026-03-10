@@ -41,17 +41,24 @@ const ParticipantEventsTable = ({ title, data }) => {
     const getEmail = (row) => row?.login_id?.email || row?.login_id?.user_id?.email || row?.participant_email || '';
 
     const getRoleLabel = (row) => {
+        const loginRole = String(
+            row?.login_id?.role_id?.name || ''
+        ).trim().toLowerCase();
+
         const appUserRole = String(
             row?.login_id?.user_id?.role ||
             row?.app_role ||
             ''
         ).trim().toLowerCase();
 
-        if (appUserRole === 'student') return 'Student';
-        if (appUserRole === 'instructor') return 'Instructor';
-        if (appUserRole === 'tenant') return 'Tenant';
-        if (appUserRole === 'superadmin') return 'Super Admin';
-        if (appUserRole) return appUserRole.charAt(0).toUpperCase() + appUserRole.slice(1);
+        const resolvedRole = loginRole || appUserRole;
+
+        if (resolvedRole === 'student') return 'Student';
+        if (resolvedRole === 'instructor') return 'Instructor';
+        if (resolvedRole === 'tenant') return 'Tenant';
+        if (resolvedRole === 'superadmin') return 'Super Admin';
+        if (resolvedRole === 'admin') return 'Admin';
+        if (resolvedRole) return resolvedRole.charAt(0).toUpperCase() + resolvedRole.slice(1);
 
         const preset = String(row?.preset_name || '').trim().toLowerCase();
         if (preset.includes('host')) return 'Instructor';

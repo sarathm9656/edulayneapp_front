@@ -257,7 +257,7 @@ const CourseBatchAttendance = () => {
             </p>
           </div>
           <button 
-            className="btn btn-success rounded-pill px-4"
+            className="btn btn-success rounded-pill px-4 course-batch-download-btn"
             onClick={downloadPDF}
             disabled={attendanceData.length === 0}
           >
@@ -309,7 +309,7 @@ const CourseBatchAttendance = () => {
           </div>
 
           <div className="attendance-chart-grid">
-            <div className="modern-card">
+            <div className="modern-card course-batch-chart-card">
               <div className="d-flex justify-content-between align-items-center mb-3 gap-3">
                 <div>
                   <h5 className="card-title mb-1">Student Attendance Percentage</h5>
@@ -317,7 +317,7 @@ const CourseBatchAttendance = () => {
                 </div>
                 <span className="course-batch-chip">{averageClassesPerStudent.toFixed(1)} avg classes/student</span>
               </div>
-                  <ResponsiveContainer width="100%" height={400}>
+                  <ResponsiveContainer width="100%" height={360}>
                     <BarChart data={studentAttendanceData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
@@ -329,7 +329,7 @@ const CourseBatchAttendance = () => {
                   </ResponsiveContainer>
             </div>
 
-            <div className="modern-card">
+            <div className="modern-card course-batch-chart-card">
               <h5 className="card-title mb-1">Overall Status Distribution</h5>
               <p className="text-muted small mb-3">Present, late, and absent records in the current report</p>
                   <ResponsiveContainer width="100%" height={300}>
@@ -389,8 +389,8 @@ const CourseBatchAttendance = () => {
                 <p className="text-muted small mb-0">Detailed breakdown for review and follow-up</p>
               </div>
             </div>
-              <div className="table-responsive">
-                <table className="table table-hover attendance-table">
+              <div className="table-responsive attendance-table-wrap course-batch-table-wrap">
+                <table className="table table-hover attendance-table course-batch-table">
                   <thead>
                     <tr>
                       <th>Rank</th>
@@ -409,30 +409,30 @@ const CourseBatchAttendance = () => {
                       const tone = performanceTone(Number(student.summary.attendance_percentage || 0));
                       return (
                       <tr key={index}>
-                        <td>
+                        <td data-label="Rank">
                           <span className="course-batch-rank-badge">#{index + 1}</span>
                         </td>
-                        <td>
+                        <td data-label="Student Name">
                           {student.student.fname} {student.student.lname}
                           <br />
                           <small className="text-muted">{student.student.user_code}</small>
                         </td>
-                        <td>{student.summary.total_classes}</td>
-                        <td>{student.summary.attended}</td>
-                        <td>
+                        <td data-label="Total Classes">{student.summary.total_classes}</td>
+                        <td data-label="Attended">{student.summary.attended}</td>
+                        <td data-label="Present">
                           <span className="badge bg-success">{student.summary.present}</span>
                         </td>
-                        <td>
+                        <td data-label="Late">
                           <span className="badge bg-warning">{student.summary.late}</span>
                         </td>
-                        <td>
+                        <td data-label="Absent">
                           <span className="badge bg-danger">{student.summary.absent}</span>
                         </td>
-                        <td>
+                        <td data-label="Performance">
                           <span className={`badge text-bg-${tone.className}`}>{tone.label}</span>
                         </td>
-                        <td>
-                          <div className="d-flex align-items-center">
+                        <td data-label="Attendance %">
+                          <div className="d-flex align-items-center course-batch-progress-cell">
                             <span className="fw-bold me-2">{Number(student.summary.attendance_percentage || 0).toFixed(1)}%</span>
                             <div className="progress flex-grow-1" style={{ height: '10px' }}>
                               <div 

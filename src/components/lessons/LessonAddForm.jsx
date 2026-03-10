@@ -58,30 +58,35 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
   }, [isOpen, moduleId]);
 
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      try {
-        setIsLoadingQuizzes(true);
-        const response = await axios.get(
-          `${import.meta.env.VITE_API_URL}/quizzes`,
-          {
-            params: { course_id: courseId },
-            withCredentials: true,
-          }
-        );
-        if (response.data.success) {
-          setQuizzes(response.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching quizzes:", error);
-      } finally {
-        setIsLoadingQuizzes(false);
-      }
-    };
-
-    if (courseId) {
+    if (courseId && moduleId) {
       fetchQuizzes();
+    } else {
+      setQuizzes([]);
     }
-  }, [courseId]);
+  }, [courseId, moduleId]);
+
+  const fetchQuizzes = async () => {
+    try {
+      setIsLoadingQuizzes(true);
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/quizzes`,
+        {
+          params: { course_id: courseId, module_id: moduleId },
+          withCredentials: true,
+        }
+      );
+      if (response.data.success) {
+        setQuizzes(response.data.data || []);
+      } else {
+        setQuizzes([]);
+      }
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+      setQuizzes([]);
+    } finally {
+      setIsLoadingQuizzes(false);
+    }
+  };
 
   const fetchModuleLessons = async () => {
     try {
@@ -533,7 +538,13 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
                             <option value="">-- Link an Assessment --</option>
                             {quizzes.map(q => <option key={q._id} value={q._id}>{q.title}</option>)}
                           </select>
-                          <p className="mt-2 small text-muted">Link a quiz from your Assessment Studio registry.</p>
+                          <p className="mt-2 small text-muted">
+                            {isLoadingQuizzes
+                              ? "Loading quizzes..."
+                              : quizzes.length > 0
+                                ? "Link a quiz from your Assessment Studio registry."
+                                : "No quizzes found for this section. Create one in Assessment Studio first."}
+                          </p>
                         </div>
                       )}
                       {(formData.lesson_type === 'pdf' || formData.lesson_type === 'ppt') && (
@@ -722,7 +733,10 @@ const LessonAddForm = ({ moduleId, courseId, module, isOpen, onToggle, onModuleC
       {/* Quiz Modal Integration */}
       <QuizManagementModal
         isOpen={showQuizManagement}
-        onClose={() => setShowQuizManagement(false)}
+        onClose={() => {
+          setShowQuizManagement(false);
+          fetchQuizzes();
+        }}
         courseId={courseId}
         moduleId={moduleId}
         courseName={module.course_title} // Assuming passing down

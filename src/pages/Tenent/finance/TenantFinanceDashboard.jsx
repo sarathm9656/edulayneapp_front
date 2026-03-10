@@ -321,6 +321,37 @@ const TenantFinanceDashboard = () => {
     };
 
     const isMobile = typeof window !== 'undefined' && window.innerWidth <= 1024;
+    const headerActionsStyle = {
+        display: 'flex',
+        gap: isMobile ? '10px' : '12px',
+        alignItems: isMobile ? 'stretch' : 'center',
+        flexDirection: isMobile ? 'column' : 'row',
+        width: isMobile ? '100%' : 'auto'
+    };
+    const syncButtonStyle = {
+        padding: isMobile ? '10px 14px' : '12px 20px',
+        background: syncing ? '#cbd5e1' : theme.primary,
+        color: 'white',
+        border: 'none',
+        borderRadius: isMobile ? '9px' : '10px',
+        cursor: syncing ? 'not-allowed' : 'pointer',
+        fontWeight: '700',
+        fontSize: isMobile ? '13px' : '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: isMobile ? '8px' : '10px',
+        boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)',
+        width: isMobile ? '100%' : 'auto',
+        minHeight: isMobile ? '42px' : 'auto'
+    };
+    const filtersWrapStyle = {
+        background: 'white',
+        padding: isMobile ? '8px' : '6px',
+        borderRadius: '12px',
+        border: '1px solid ' + theme.border,
+        width: isMobile ? '100%' : 'auto'
+    };
 
     return (
         <div style={containerStyle}>
@@ -369,29 +400,16 @@ const TenantFinanceDashboard = () => {
                     <p style={{ color: theme.textMuted, fontSize: '16px', fontWeight: '500' }}>Strategic oversight of educational workload and financial efficiency.</p>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }} className="no-print">
+                <div style={headerActionsStyle} className="no-print">
                     <button
                         onClick={handleSync}
                         disabled={syncing}
-                        style={{
-                            padding: '12px 20px',
-                            background: syncing ? '#cbd5e1' : theme.primary,
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '10px',
-                            cursor: syncing ? 'not-allowed' : 'pointer',
-                            fontWeight: '700',
-                            fontSize: '14px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            boxShadow: '0 4px 12px rgba(79, 70, 229, 0.2)'
-                        }}
+                        style={syncButtonStyle}
                     >
                         <FaSyncAlt className={syncing ? "animate-spin" : ""} />
                         {syncing ? 'Syncing Dyte...' : 'Sync Live Data'}
                     </button>
-                    <div style={{ background: 'white', padding: '6px', borderRadius: '12px', border: '1px solid ' + theme.border }}>
+                    <div style={filtersWrapStyle}>
                         <FinanceFilters
                             month={month}
                             year={year}

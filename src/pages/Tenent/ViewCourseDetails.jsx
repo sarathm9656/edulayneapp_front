@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { FaArrowLeft } from "react-icons/fa";
 
 import {
   fetchCourseDetails,
@@ -86,6 +85,20 @@ function renderLessonContent(lesson) {
         </div>
       );
 
+    case "quiz":
+      return (
+        <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-white p-5 text-center">
+          <div className="p-4 rounded-circle mb-3 bg-warning bg-opacity-10 text-warning">
+            <i className="fa-solid fa-question fs-1"></i>
+          </div>
+          <h4 className="fw-bold text-dark">{lesson.lesson_title}</h4>
+          <p className="text-muted mb-2">This lesson is a quiz assessment.</p>
+          <p className="text-muted mb-0">
+            Quiz is attached and ready for learners in the student course view.
+          </p>
+        </div>
+      );
+
     case "text":
       return (
         <div className="bg-white h-100 overflow-auto p-4 p-md-5">
@@ -112,7 +125,6 @@ const ViewCourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation();
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [expandedModules, setExpandedModules] = useState(new Set());
   const [showAll, setShowAll] = useState(false);
@@ -325,14 +337,6 @@ const ViewCourseDetails = () => {
     setExpandedModules(new Set());
   };
 
-  const handleGoBack = () => {
-    if (location.state?.fromInstructor) {
-      navigate(`/tenant/instructor/${location.state.instructorId}`);
-    } else {
-      navigate(-1);
-    }
-  };
-
   return (
     <div className="h-100 d-flex flex-column">
       <main className="container-wrapper-scroll flex-grow-1 bg-light">
@@ -340,36 +344,34 @@ const ViewCourseDetails = () => {
         <section className="dashboard-header py-4 bg-white border-bottom sticky-top shadow-sm" style={{ zIndex: 10 }}>
           <div className="container-fluid px-4">
             <div className="d-flex align-items-center justify-content-between">
-              <div className="d-flex align-items-center gap-3">
-                <button
-                  onClick={handleGoBack}
-                  className="btn btn-light rounded-circle p-2 border shadow-sm transition-all"
-                  style={{ width: "40px", height: "40px" }}
-                >
-                  <FaArrowLeft className="text-primary" />
-                </button>
-                <div>
-                  <h2 className="fw-bold text-dark mb-0">{course.course_title}</h2>
-                  <div className="d-flex align-items-center gap-3 mt-1">
-                    <span className="badge bg-soft-primary text-primary px-3 rounded-pill">
-                      {course.category?.category}
-                    </span>
-                    <span className="text-muted small fw-medium border-start ps-3">
-                      {modules?.length || 0} Modules Total
-                    </span>
-                  </div>
+              <div>
+                <h2 className="fw-bold text-dark mb-0">{course.course_title}</h2>
+                <div className="d-flex align-items-center gap-3 mt-1">
+                  <span className="badge bg-soft-primary text-primary px-3 rounded-pill">
+                    {course.category?.category}
+                  </span>
+                  <span className="text-muted small fw-medium border-start ps-3">
+                    {modules?.length || 0} Modules Total
+                  </span>
                 </div>
               </div>
-              {/* <div className="d-flex gap-2">
+              <div className="d-flex gap-2 flex-wrap">
                 <button
-                  className="btn btn-primary d-flex align-items-center gap-2 px-4 fw-bold rounded-pill shadow"
-                  style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", border: "none" }}
-                  onClick={() => setShowModal(true)}
+                  className="btn btn-outline-primary preview-header-btn d-inline-flex align-items-center fw-bold rounded-pill"
+                  onClick={() => navigate(`/tenant/edit-course/${id}`)}
                 >
-                  <i className="fa-solid fa-user-plus"></i>
-                  Manage Students
+                  <i className="fa-solid fa-pen"></i>
+                  Edit Course Details
                 </button>
-              </div> */}
+                <button
+                  className="btn btn-primary preview-header-btn d-inline-flex align-items-center fw-bold rounded-pill shadow"
+                  style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", border: "none" }}
+                  onClick={() => navigate(`/tenant/curriculum/${id}`)}
+                >
+                  <i className="fa-solid fa-layer-group"></i>
+                  Manage Curriculum
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -531,6 +533,7 @@ const ViewCourseDetails = () => {
                                       <div className={`p-2 rounded-3 ${selectedLesson?._id === lesson._id ? "bg-primary text-white" : "bg-white border text-muted"}`}>
                                         <i className={`fa-solid ${lesson.lesson_type_id?.lesson_type === 'video' ? 'fa-play' :
                                           lesson.lesson_type_id?.lesson_type === 'pdf' ? 'fa-file-pdf' :
+                                            lesson.lesson_type_id?.lesson_type === 'quiz' ? 'fa-question-circle' :
                                             lesson.lesson_type_id?.lesson_type === 'ppt' ? 'fa-file-powerpoint' :
                                               lesson.lesson_type_id?.lesson_type === 'link' ? 'fa-link' :
                                                 'fa-file-lines'
@@ -696,6 +699,141 @@ const ViewCourseDetails = () => {
          .nav-pills .nav-link { color: #667eea; }
          .accordion-button:not(.collapsed) { background: #f8fafc; color: #667eea; }
          .list-group-item-action:hover { background: #f1f5f9; }
+         .preview-header-btn {
+           padding: 8px 12px !important;
+           font-size: 0.78rem !important;
+           line-height: 1.2;
+           min-height: 34px;
+           gap: 6px;
+           white-space: nowrap;
+          }
+         .card-body .btn.rounded-circle {
+           width: 38px;
+           height: 38px;
+         }
+         .nav.nav-pills .nav-link {
+           padding: 0.45rem 0.9rem;
+           font-size: 0.9rem;
+         }
+         .card-header .btn.btn-sm {
+           padding: 0.3rem 0.65rem;
+           font-size: 0.8rem;
+         }
+
+         @media (max-width: 1199.98px) {
+           .sticky-sidebar {
+             position: static;
+             top: auto;
+           }
+         }
+
+         @media (max-width: 991.98px) {
+           .dashboard-header .container-fluid,
+           .course-content-area .container-fluid {
+             padding-left: 1rem !important;
+             padding-right: 1rem !important;
+           }
+           .dashboard-header .d-flex.align-items-center.justify-content-between {
+             flex-direction: column;
+             align-items: flex-start !important;
+             gap: 1rem;
+           }
+           .dashboard-header .d-flex.gap-2.flex-wrap {
+             width: 100%;
+           }
+           .dashboard-header .d-flex.gap-2.flex-wrap .preview-header-btn {
+             padding: 8px 10px !important;
+             font-size: 0.76rem !important;
+           }
+           .course-content-area .row.g-4 {
+             --bs-gutter-y: 1rem;
+           }
+           .card-body .d-flex.justify-content-between.align-items-start.mb-4 {
+             flex-direction: column;
+             gap: 1rem;
+           }
+         }
+
+         @media (max-width: 767.98px) {
+           .dashboard-header {
+             position: static !important;
+           }
+           .ratio.ratio-16x9 {
+             min-height: 280px;
+           }
+           .card-body.p-4,
+           .card-header.py-3.px-4,
+           .card-header.bg-white.border-bottom-0.pt-4.px-4.pb-0 {
+             padding-left: 1rem !important;
+             padding-right: 1rem !important;
+           }
+           .card-body .d-flex.justify-content-between.align-items-start.mb-4 .d-flex.gap-2 {
+             width: 100%;
+             justify-content: flex-start;
+           }
+           .nav.nav-pills {
+             width: 100% !important;
+             display: flex !important;
+             flex-wrap: wrap;
+             gap: 0.5rem;
+             padding: 0.5rem !important;
+           }
+           .nav.nav-pills .nav-item {
+             flex: 1 1 120px;
+           }
+           .nav.nav-pills .nav-link {
+             width: 100%;
+             padding: 0.45rem 0.75rem;
+             font-size: 0.84rem;
+           }
+           .accordion-button.py-3.px-4,
+           .list-group-item.py-3.px-4 {
+             padding-left: 1rem !important;
+             padding-right: 1rem !important;
+           }
+           .list-group-item.d-flex.gap-3.align-items-start {
+             gap: 0.75rem !important;
+           }
+           .footer-wrapper {
+             margin-top: 1rem !important;
+           }
+         }
+
+         @media (max-width: 575.98px) {
+           .dashboard-header h2 {
+             font-size: 1.35rem;
+           }
+           .dashboard-header .d-flex.align-items-center.gap-3.mt-1 {
+             flex-wrap: wrap;
+             gap: 0.5rem !important;
+           }
+           .dashboard-header .d-flex.gap-2.flex-wrap {
+             flex-direction: row;
+             flex-wrap: wrap;
+           }
+           .dashboard-header .d-flex.gap-2.flex-wrap .preview-header-btn {
+             padding: 7px 9px !important;
+             font-size: 0.72rem !important;
+            }
+           .course-content-area .container-fluid,
+           .dashboard-header .container-fluid,
+           .footer-wrapper .container {
+             padding-left: 0.75rem !important;
+             padding-right: 0.75rem !important;
+           }
+           .ratio.ratio-16x9 {
+             min-height: 220px;
+           }
+           .card-body.p-4 {
+             padding: 0.9rem !important;
+           }
+           .card-header.py-3.px-4 {
+             padding: 0.9rem !important;
+           }
+           .list-group-item .flex-grow-1 div {
+             font-size: 0.84rem !important;
+           }
+         }
       `}</style>
     </div>
   );

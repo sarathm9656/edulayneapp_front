@@ -13,10 +13,29 @@ import { fetchInstructors } from "@/redux/tenant.slice";
 import toast from "react-hot-toast";
 import api from "@/api/axiosInstance";
 
+const initialBatchForm = {
+  batch_name: "",
+  course_id: "",
+  instructor_id: "",
+  instructor_ids: [],
+  start_date: "",
+  end_date: "",
+  subscription_price: 1000,
+  subscription_enabled: true,
+  max_students: 0,
+  batch_time: "",
+  start_time: "",
+  end_time: "",
+  recurring_days: [],
+  meeting_link: "",
+  meeting_platform: "Dyte",
+  is_strict_schedule: true,
+};
+
 const TenantBatches = () => {
   const dispatch = useDispatch();
   const { allCourseNames } = useSelector((state) => state.course);
-  const { batches, loading, error, success } = useSelector(
+  const { batches, loading, error, createSuccess } = useSelector(
     (state) => state.batch
   );
   const { instructors } = useSelector((state) => state.tenant);
@@ -26,24 +45,7 @@ const TenantBatches = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingBatch, setEditingBatch] = useState(null);
   const [deletingBatch, setDeletingBatch] = useState(null);
-  const [form, setForm] = useState({
-    batch_name: "",
-    course_id: "",
-    instructor_id: "",
-    instructor_ids: [],
-    start_date: "",
-    end_date: "",
-    subscription_price: 1000,
-    subscription_enabled: true,
-    max_students: 0,
-    batch_time: "",
-    start_time: "",
-    end_time: "",
-    recurring_days: [],
-    meeting_link: "",
-    meeting_platform: "Dyte",
-    is_strict_schedule: true,
-  });
+  const [form, setForm] = useState(initialBatchForm);
   const [editForm, setEditForm] = useState({
     batch_name: "",
     course_id: "",
@@ -68,6 +70,8 @@ const TenantBatches = () => {
   const [enrollingBatch, setEnrollingBatch] = useState(null);
   const [allStudents, setAllStudents] = useState([]);
   const [batchStudents, setBatchStudents] = useState([]);
+  const [showRemoveStudentModal, setShowRemoveStudentModal] = useState(false);
+  const [studentToRemove, setStudentToRemove] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
   const [searchBatchName, setSearchBatchName] = useState("");
@@ -80,6 +84,7 @@ const TenantBatches = () => {
   const [activeRecording, setActiveRecording] = useState(null);
   const [recordingActionKey, setRecordingActionKey] = useState("");
   const [isUploadingToYoutube, setIsUploadingToYoutube] = useState(false);
+  const [publicLinkRole, setPublicLinkRole] = useState("student");
 
 
   useEffect(() => {
@@ -90,27 +95,13 @@ const TenantBatches = () => {
 
   // Handle success and error messages
   useEffect(() => {
-    if (success) {
+    if (createSuccess) {
       toast.success("Batch created successfully!");
-      dispatch(resetSuccess());
       setShowModal(false);
-      setForm({
-        batch_name: "",
-        course_id: "",
-        instructor_id: "",
-        instructor_ids: [],
-        start_date: "",
-        end_date: "",
-        max_students: 0,
-        batch_time: "",
-        start_time: "",
-        end_time: "",
-        recurring_days: [],
-        meeting_link: "",
-        meeting_platform: "Dyte",
-      });
+      setForm(initialBatchForm);
+      dispatch(resetSuccess());
     }
-  }, [success, dispatch]);
+  }, [createSuccess, dispatch]);
 
   useEffect(() => {
     if (error) {
@@ -145,6 +136,11 @@ const TenantBatches = () => {
     const base = getServerBaseUrl();
     const clean = String(value).replace(/^\/+/, "");
     return `${base}/${clean}`;
+  };
+
+  const getBatchAccessLink = (batchId, role = "student") => {
+    if (!batchId || typeof window === "undefined") return "";
+    return `${window.location.origin}/join-batch/${encodeURIComponent(batchId)}?role=${encodeURIComponent(role)}`;
   };
 
   const isYoutubeUrl = (url) => /(?:youtube\.com|youtu\.be)/i.test(url || "");
@@ -695,7 +691,9 @@ const TenantBatches = () => {
         batch_time: combinedTime,
         instructor_ids: safeInstructorIds
       };
-      await dispatch(createBatch(formData));
+      await dispatch(createBatch(formData)).unwrap();
+      setShowModal(false);
+      setForm(initialBatchForm);
     } catch (error) {
       console.error("Error creating batch:", error);
     }
@@ -730,6 +728,9 @@ const TenantBatches = () => {
       const formData = {
         ...editForm,
         batch_time: combinedTime,
+        meeting_link: editForm.meeting_platform === "Dyte"
+          ? getBatchAccessLink(editingBatch?._id, publicLinkRole)
+          : editForm.meeting_link,
         instructor_ids: safeInstructorIds
       };
       await dispatch(
@@ -810,11 +811,11 @@ const TenantBatches = () => {
     });
   };
 
-  const handleRemoveStudent = async (studentId) => {
-    if (!window.confirm("Are you sure you want to remove this student from the batch?")) return;
-
+  const handleRemoveStudent = async () => {
+    if (!studentToRemove?.login_id) return;
     try {
       setEnrollmentLoading(true);
+      const studentId = studentToRemove.login_id;
       const newBatchStudents = batchStudents.filter(s => s.login_id !== studentId);
 
       const response = await api.post(
@@ -827,6 +828,8 @@ const TenantBatches = () => {
         setBatchStudents(newBatchStudents);
         setAllStudents(prev => prev.map(s => s.login_id === studentId ? { ...s, isEnrolled: false } : s));
         dispatch(fetchBatches());
+        setShowRemoveStudentModal(false);
+        setStudentToRemove(null);
       }
     } catch (error) {
       console.error("Error removing student:", error);
@@ -834,6 +837,17 @@ const TenantBatches = () => {
     } finally {
       setEnrollmentLoading(false);
     }
+  };
+
+  const handleOpenRemoveStudentModal = (student) => {
+    setStudentToRemove(student);
+    setShowRemoveStudentModal(true);
+  };
+
+  const handleCloseRemoveStudentModal = () => {
+    if (enrollmentLoading) return;
+    setShowRemoveStudentModal(false);
+    setStudentToRemove(null);
   };
 
   const handleAddSelectedStudents = async () => {
@@ -1054,26 +1068,19 @@ const TenantBatches = () => {
       meeting_platform: batch.meeting_platform || "Dyte",
       is_strict_schedule: batch.is_strict_schedule !== undefined ? batch.is_strict_schedule : true,
     });
+    setPublicLinkRole("student");
     setShowEditModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setForm({
-      batch_name: "",
-      course_id: "",
-      instructor_id: "",
-      instructor_ids: [],
-      start_date: "",
-      end_date: "",
-      subscription_price: 1000,
-      subscription_enabled: true,
-    });
+    setForm(initialBatchForm);
   };
 
   const handleCloseEditModal = () => {
     setShowEditModal(false);
     setEditingBatch(null);
+    setPublicLinkRole("student");
     setEditForm({
       batch_name: "",
       course_id: "",
@@ -2141,21 +2148,43 @@ const TenantBatches = () => {
                           </div>
 
                           <div className="row mb-3">
-                            <div className="col-md-6">
-                              <label className="form-label">Meeting Platform</label>
-                              <select
-                                name="meeting_platform"
-                                value={editForm.meeting_platform}
-                                onChange={handleEditChange}
-                                className="form-control"
-                              >
-                                <option value="Dyte">Dyte</option>
-                                <option value="Google Meet">Google Meet</option>
-                                <option value="Other">Other</option>
-                              </select>
-                            </div>
-                            <div className="col-md-6">
+                            <div className="col-md-12">
                               <label className="form-label">Meeting Link</label>
+                              {editForm.meeting_platform === "Dyte" && editingBatch?._id ? (
+                                <>
+                                  <div className="row g-2 mb-2">
+                                    <div className="col-md-4">
+                                      <select
+                                        className="form-control"
+                                        value={publicLinkRole}
+                                        onChange={(e) => setPublicLinkRole(e.target.value)}
+                                      >
+                                        <option value="student">Student Link</option>
+                                        <option value="admin">Admin Link</option>
+                                      </select>
+                                    </div>
+                                    <div className="col-md-8">
+                                      <div className="input-group">
+                                        <input
+                                          type="text"
+                                          className="form-control"
+                                          value={getBatchAccessLink(editingBatch._id, publicLinkRole)}
+                                          readOnly
+                                        />
+                                        <a
+                                          href={getBatchAccessLink(editingBatch._id, publicLinkRole)}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="btn btn-outline-secondary"
+                                          title="Open Link"
+                                        >
+                                          <i className="fa-solid fa-external-link-alt"></i>
+                                        </a>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </>
+                              ) : (
                               <div className="input-group">
                                 <input
                                   type="text"
@@ -2171,6 +2200,7 @@ const TenantBatches = () => {
                                   </a>
                                 )}
                               </div>
+                              )}
                             </div>
                           </div>
 
@@ -2493,7 +2523,7 @@ const TenantBatches = () => {
                                           <td className="text-end">
                                             <button
                                               className="btn btn-outline-danger btn-sm"
-                                              onClick={() => handleRemoveStudent(student.login_id)}
+                                              onClick={() => handleOpenRemoveStudentModal(student)}
                                               title="Remove from batch"
                                             >
                                               <i className="fa-solid fa-trash"></i>
@@ -2599,6 +2629,99 @@ const TenantBatches = () => {
                       <div className="modal-footer">
                         {/* Empty footer as actions are inline */}
                         <button type="button" className="btn btn-secondary" onClick={handleEnrollCancel}>Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {showRemoveStudentModal && studentToRemove && (
+              <>
+                <div
+                  className="modal-backdrop fade show"
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    zIndex: 1060
+                  }}
+                  onClick={handleCloseRemoveStudentModal}
+                ></div>
+
+                <div
+                  className="modal fade show d-block"
+                  style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: 1070,
+                    overflow: 'auto'
+                  }}
+                  tabIndex="-1"
+                >
+                  <div className="modal-dialog modal-dialog-centered">
+                    <div className="modal-content border-0 shadow-lg">
+                      <div className="modal-header">
+                        <h5 className="modal-title text-danger">
+                          <i className="fa-solid fa-user-minus me-2"></i>
+                          Remove Student
+                        </h5>
+                        <button
+                          type="button"
+                          className="btn-close"
+                          onClick={handleCloseRemoveStudentModal}
+                          disabled={enrollmentLoading}
+                        ></button>
+                      </div>
+
+                      <div className="modal-body">
+                        <div className="alert alert-warning mb-3">
+                          This student will be removed from the batch.
+                        </div>
+                        <p className="mb-2">
+                          <strong>Batch:</strong> {enrollingBatch?.batch_name}
+                        </p>
+                        <p className="mb-2">
+                          <strong>Name:</strong> {studentToRemove.fname} {studentToRemove.lname}
+                        </p>
+                        <p className="mb-0">
+                          <strong>Email:</strong> {studentToRemove.email || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div className="modal-footer">
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={handleCloseRemoveStudentModal}
+                          disabled={enrollmentLoading}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={handleRemoveStudent}
+                          disabled={enrollmentLoading}
+                        >
+                          {enrollmentLoading ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              Removing...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fa-solid fa-trash me-2"></i>
+                              Remove
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>

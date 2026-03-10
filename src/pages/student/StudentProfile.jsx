@@ -15,7 +15,8 @@ const StudentProfile = () => {
         fname: "",
         lname: "",
         email: "",
-        phone_number: ""
+        phone_number: "",
+        address: ""
     });
     const [studentStats, setStudentStats] = useState({
         totalCourses: 0,
@@ -37,7 +38,8 @@ const StudentProfile = () => {
                 fname: user?.user_id?.fname || "",
                 lname: user?.user_id?.lname || "",
                 email: user?.email || "",
-                phone_number: user?.user_id?.phone_number || ""
+                phone_number: user?.user_id?.phone_number || "",
+                address: user?.user_id?.address || user?.address || ""
             });
         }
     }, [user]);
@@ -105,7 +107,8 @@ const StudentProfile = () => {
                 fname: formData.fname.trim(),
                 lname: formData.lname.trim(),
                 email: formData.email.trim(),
-                phone_number: formData.phone_number.trim()
+                phone_number: formData.phone_number.trim(),
+                address: formData.address.trim()
             };
 
             // Get the user ID from the user data
@@ -151,7 +154,8 @@ const StudentProfile = () => {
             formData.fname !== (user?.user_id?.fname || "") ||
             formData.lname !== (user?.user_id?.lname || "") ||
             formData.email !== (user?.email || "") ||
-            formData.phone_number !== (user?.user_id?.phone_number || "");
+            formData.phone_number !== (user?.user_id?.phone_number || "") ||
+            formData.address !== (user?.user_id?.address || user?.address || "");
 
         if (hasChanges) {
             if (window.confirm("You have unsaved changes. Are you sure you want to cancel?")) {
@@ -169,7 +173,8 @@ const StudentProfile = () => {
                 fname: user?.user_id?.fname || "",
                 lname: user?.user_id?.lname || "",
                 email: user?.email || "",
-                phone_number: user?.user_id?.phone_number || ""
+                phone_number: user?.user_id?.phone_number || "",
+                address: user?.user_id?.address || user?.address || ""
             });
         }
         setIsEditing(false);
@@ -274,6 +279,10 @@ const StudentProfile = () => {
                                     <div className="mb-3">
                                         <label className="form-label fw-bold">Age</label>
                                         <p className="form-control-plaintext">{user?.user_id?.age || 'N/A'}</p>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label fw-bold">Address</label>
+                                        <p className="form-control-plaintext">{user?.user_id?.address || user?.address || 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -471,6 +480,18 @@ const StudentProfile = () => {
                                                     value={formData.phone_number}
                                                     onChange={handleInputChange}
                                                     disabled={isUpdating}
+                                                />
+                                            </div>
+                                            <div className="col-12 mb-3">
+                                                <label className="form-label fw-bold">Address</label>
+                                                <textarea
+                                                    className="form-control"
+                                                    name="address"
+                                                    value={formData.address}
+                                                    onChange={handleInputChange}
+                                                    disabled={isUpdating}
+                                                    rows="3"
+                                                    placeholder="Enter address"
                                                 />
                                             </div>
                                         </div>

@@ -83,6 +83,20 @@ function renderLessonContent(lesson) {
         </div>
       );
 
+    case "quiz":
+      return (
+        <div className="d-flex flex-column align-items-center justify-content-center h-100 bg-white p-5 text-center">
+          <div className="p-4 rounded-circle mb-3 bg-warning bg-opacity-10 text-warning">
+            <i className="fa-solid fa-question fs-1"></i>
+          </div>
+          <h4 className="fw-bold text-dark">{lesson.lesson_title}</h4>
+          <p className="text-muted mb-2">This lesson is configured as a quiz assessment.</p>
+          <p className="text-muted mb-0">
+            Students can launch and submit this quiz from their course player.
+          </p>
+        </div>
+      );
+
     case "text":
       return (
         <div className="bg-white h-100 overflow-auto p-4 p-md-5">
@@ -423,6 +437,7 @@ const ViewCourseDetailsInstructor = () => {
                                       <div className={`p-2 rounded-3 ${selectedLesson?._id === lesson._id ? "bg-primary text-white" : "bg-white border text-muted"}`}>
                                         <i className={`fa-solid ${lesson.lesson_type_id?.lesson_type === 'video' ? 'fa-play' :
                                           lesson.lesson_type_id?.lesson_type === 'pdf' ? 'fa-file-pdf' :
+                                            lesson.lesson_type_id?.lesson_type === 'quiz' ? 'fa-question-circle' :
                                             lesson.lesson_type_id?.lesson_type === 'ppt' ? 'fa-file-powerpoint' :
                                               lesson.lesson_type_id?.lesson_type === 'link' ? 'fa-link' :
                                                 'fa-file-lines'

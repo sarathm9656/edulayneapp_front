@@ -15,6 +15,7 @@ const EditUserModal = ({ openEditUserModal, setOpenEditUserModal, instructor ,ro
     dob: '',
     phone_number: '',
     email: '',
+    address: '',
     id: '',
     status: '',
   });
@@ -46,6 +47,7 @@ const EditUserModal = ({ openEditUserModal, setOpenEditUserModal, instructor ,ro
         dob: instructor.dob || '',
         phone_number: instructor.phone_number || '',
         email: instructor.email || '',
+        address: instructor.address || instructor.user?.address || instructor.user_id?.address || '',
         user_id: instructor.user_id || '',
         id: instructor.id || instructor._id || '',
         status: status,
@@ -276,19 +278,37 @@ const EditUserModal = ({ openEditUserModal, setOpenEditUserModal, instructor ,ro
                 
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email Address</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Enter email address"
-                    disabled
-                  />
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="fa-solid fa-pen-to-square"></i>
+                    </span>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter email address"
+                      required
+                    />
+                  </div>
                   {errors.email && (
                     <div className="invalid-feedback">{errors.email}</div>
                   )}
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="address" className="form-label">Address</label>
+                  <textarea
+                    id="address"
+                    name="address"
+                    className="form-control"
+                    value={formData.address}
+                    onChange={handleChange}
+                    placeholder="Enter address"
+                    rows="3"
+                  />
                 </div>
                 
                 <div className="mb-3">

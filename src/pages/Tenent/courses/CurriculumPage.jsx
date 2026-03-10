@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { FaArrowLeft, FaPlus, FaSave, FaTrash, FaEdit, FaRocket, FaChevronRight } from "react-icons/fa";
-import { MdDragIndicator, MdExpandMore, MdExpandLess, MdDashboard, MdAutoStories, MdSettings } from "react-icons/md";
+import { FaPlus, FaTrash, FaRocket } from "react-icons/fa";
+import { MdDragIndicator, MdDashboard, MdAutoStories } from "react-icons/md";
 import LessonAddForm from "../../../components/lessons/LessonAddForm";
 import {
     fetchModulesByCourseId,
@@ -110,16 +110,10 @@ const CurriculumPage = () => {
             {/* Premium Header */}
             <div className="premium-nav-glass sticky-top">
                 <div className="container-fluid px-lg-5 px-3 py-3">
-                    <div className="d-flex align-items-center justify-content-between">
-                        <div className="d-flex align-items-center gap-4">
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="back-btn-premium"
-                            >
-                                <FaArrowLeft size={14} />
-                            </button>
+                    <div className="curriculum-header-shell d-flex align-items-center justify-content-between">
+                        <div className="curriculum-header-copy d-flex align-items-center gap-4">
                             <div>
-                                <div className="d-flex align-items-center gap-2 mb-1">
+                                <div className="curriculum-header-meta d-flex align-items-center gap-2 mb-1">
                                     <span className="badge-studio">CURRICULUM ENGINE</span>
                                     <span className="sep-dot"></span>
                                     <span className="text-muted extra-small fw-bold letter-spacing-1">COURSE DESIGNER</span>
@@ -127,8 +121,11 @@ const CurriculumPage = () => {
                                 <h4 className="fw-black text-dark mb-0 title-gradient-simple">{courseDetails?.course_title || "Course Builder"}</h4>
                             </div>
                         </div>
-                        <div className="d-flex gap-2">
-                            <button className="btn-preview-premium">
+                        <div className="curriculum-header-actions d-flex gap-2">
+                            <button
+                                className="btn-preview-premium"
+                                onClick={() => navigate(`/tenant/view-course-details/${courseId}`)}
+                            >
                                 <i className="fa-solid fa-eye me-2"></i> Preview Course
                             </button>
                             <button
@@ -320,23 +317,19 @@ const CurriculumPage = () => {
                     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
                     z-index: 1020;
                 }
-                .back-btn-premium {
-                    width: 44px;
-                    height: 44px;
-                    border-radius: 14px;
-                    background: white;
-                    border: 1px solid #e2e8f0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: #64748b;
-                    transition: all 0.2s;
-                    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+                .curriculum-header-shell {
+                    gap: 1rem;
                 }
-                .back-btn-premium:hover {
-                    color: #4f46e5;
-                    border-color: #4f46e5;
-                    transform: translateX(-3px);
+                .curriculum-header-copy {
+                    min-width: 0;
+                    flex: 1;
+                }
+                .curriculum-header-meta {
+                    flex-wrap: wrap;
+                }
+                .curriculum-header-actions {
+                    flex-wrap: wrap;
+                    justify-content: flex-end;
                 }
                 .badge-studio {
                     background: #eff6ff;
@@ -491,8 +484,8 @@ const CurriculumPage = () => {
                 /* Curriculum Stack */
                 .module-v2-wrapper {
                     display: flex;
-                    gap: 2rem;
-                    margin-bottom: 2rem;
+                    gap: 1rem;
+                    margin-bottom: 1.5rem;
                     cursor: grab;
                 }
                 .module-v2-wrapper:active { cursor: grabbing; }
@@ -500,11 +493,11 @@ const CurriculumPage = () => {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    width: 40px;
+                    width: 28px;
                     flex-shrink: 0;
                 }
                 .module-indexer .drag {
-                    width: 40px;
+                    width: 28px;
                     height: 28px;
                     display: flex;
                     align-items: center;
@@ -513,8 +506,8 @@ const CurriculumPage = () => {
                     margin-bottom: 6px;
                 }
                 .module-indexer .idx {
-                    width: 40px;
-                    height: 40px;
+                    width: 28px;
+                    height: 28px;
                     background: white;
                     border: 2px solid #e2e8f0;
                     border-radius: 50%;
@@ -522,7 +515,7 @@ const CurriculumPage = () => {
                     align-items: center;
                     justify-content: center;
                     font-weight: 800;
-                    font-size: 0.75rem;
+                    font-size: 0.65rem;
                     color: #94a3b8;
                     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
                 }
@@ -583,6 +576,93 @@ const CurriculumPage = () => {
 
                 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
                 @keyframes popIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+                @media (max-width: 991.98px) {
+                    .curriculum-header-shell {
+                        align-items: flex-start !important;
+                        flex-direction: column;
+                    }
+                    .curriculum-header-actions {
+                        width: 100%;
+                        justify-content: flex-start;
+                    }
+                    .btn-preview-premium,
+                    .btn-add-section-premium {
+                        flex: 1 1 220px;
+                        text-align: center;
+                        justify-content: center;
+                    }
+                    .module-v2-wrapper {
+                        gap: 0.75rem;
+                    }
+                }
+
+                @media (max-width: 767.98px) {
+                    .curriculum-page-v2 {
+                        overflow-x: hidden;
+                    }
+                    .title-gradient-simple {
+                        font-size: 1.2rem;
+                        line-height: 1.4;
+                    }
+                    .dashboard-summary-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .summary-card {
+                        padding: 1.25rem;
+                    }
+                    .module-v2-wrapper {
+                        flex-direction: column;
+                        gap: 0.75rem;
+                        margin-bottom: 1.5rem;
+                    }
+                    .module-indexer {
+                        width: 100%;
+                        flex-direction: row;
+                        align-items: center;
+                        justify-content: flex-start;
+                    }
+                    .module-indexer .drag {
+                        margin-bottom: 0;
+                        margin-right: 0.5rem;
+                    }
+                    .module-indexer .connector {
+                        flex: 1;
+                        height: 2px;
+                        width: auto;
+                        margin: 0 0 0 0.75rem;
+                        background: repeating-linear-gradient(to right, #e2e8f0 0, #e2e8f0 10px, transparent 10px, transparent 15px);
+                    }
+                    .premium-form-card .p-4,
+                    .card-inner .p-4 {
+                        padding: 1rem !important;
+                    }
+                    .btn-add-section-dashed {
+                        padding: 1.1rem;
+                    }
+                    .curriculum-empty-state {
+                        padding: 3rem 1rem;
+                    }
+                }
+
+                @media (max-width: 575.98px) {
+                    .premium-nav-glass .container-fluid {
+                        padding-left: 1rem !important;
+                        padding-right: 1rem !important;
+                    }
+                    .curriculum-header-actions {
+                        flex-direction: column;
+                    }
+                    .btn-preview-premium,
+                    .btn-add-section-premium,
+                    .btn-primary-premium,
+                    .btn-ghost-premium {
+                        width: 100%;
+                    }
+                    .badge-studio {
+                        font-size: 0.58rem;
+                    }
+                }
             `}</style>
         </div>
     );

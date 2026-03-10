@@ -20,6 +20,7 @@ import DashboardLayout from "./pages/Tenent/layouts/DashbordLayout";
 import ModernTenantLayout from "./pages/Tenent/layouts/ModernTenantLayout";
 import GeneratePassword from "./pages/common/GeneratePassword";
 import MeetingRoom from "./pages/common/MeetingRoom";
+import BatchJoinRedirect from "./pages/common/BatchJoinRedirect";
 
 import ModernTenantDashboard from "./pages/Tenent/ModernTenantDashboard";
 import TenantInstructor from "./pages/Tenent/instructor/TenantInstructor";
@@ -83,6 +84,7 @@ function App() {
 
         {/* Auth Routes */}
         <Route path="/meeting" element={<MeetingRoom />} />
+        <Route path="/join-batch/:batchId" element={<BatchJoinRedirect />} />
         <Route path="/users/login" element={<UserLogin />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />

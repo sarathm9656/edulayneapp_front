@@ -5,6 +5,7 @@ import { fetchStudents } from "../../../redux/tenant.slice";
 import api from "@/api/axiosInstance";
 import { toast } from "react-toastify";
 import ManageEnrollmentModal from "../../../components/tenants/ManageEnrollmentModal";
+import EditUserModal from "../../common/editUserModal/EditUserModal";
 
 const StudentDetails = () => {
     const { id } = useParams();
@@ -15,6 +16,7 @@ const StudentDetails = () => {
     const [detailedStudent, setDetailedStudent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showManageModal, setShowManageModal] = useState(false);
+    const [openEditUserModal, setOpenEditUserModal] = useState(false);
     useEffect(() => {
         if (!students || students.length === 0) {
             dispatch(fetchStudents());
@@ -48,6 +50,12 @@ const StudentDetails = () => {
             setStudent(found);
         }
     }, [students, id]);
+
+    useEffect(() => {
+        if (!openEditUserModal && id) {
+            fetchDetailedStudent();
+        }
+    }, [openEditUserModal, id]);
 
     if (loading && !detailedStudent) {
         return (
@@ -98,10 +106,14 @@ const StudentDetails = () => {
     return (
         <div className="modern-layout-content p-4">
             <div className="mb-4 d-flex align-items-center gap-3">
-                <button className="btn btn-light rounded-circle shadow-sm" onClick={() => navigate(-1)}>
-                    <i className="fa-solid fa-arrow-left"></i>
-                </button>
                 <h2 className="mb-0 fw-bold">Student Profile</h2>
+                <button
+                    className="btn btn-primary rounded-pill ms-auto px-4 shadow-sm"
+                    onClick={() => setOpenEditUserModal(true)}
+                >
+                    <i className="fa-solid fa-pen-to-square me-2"></i>
+                    Edit Student
+                </button>
             </div>
 
             <div className="modern-grid">
@@ -339,6 +351,15 @@ const StudentDetails = () => {
                 student={currentStudent}
                 onSuccess={fetchDetailedStudent}
             />
+
+            {openEditUserModal && currentStudent && (
+                <EditUserModal
+                    openEditUserModal={openEditUserModal}
+                    setOpenEditUserModal={setOpenEditUserModal}
+                    instructor={currentStudent}
+                    role="student"
+                />
+            )}
         </div>
     );
 };
