@@ -36,6 +36,7 @@ import CurriculumPage from "./pages/Tenent/courses/CurriculumPage";
 import EditCoursePage from "./pages/Tenent/courses/EditCoursePage";
 
 import UserLogin from "./pages/common/auth/UserLogin";
+import UserOtpLogin from "./pages/common/auth/UserOtpLogin";
 import CourseDetails from "./pages/student/CourseDetails";
 import ViewCourseDetails from "./pages/Tenent/ViewCourseDetails";
 import TenantsManagement from "./pages/superadmin/TenantsManagement";
@@ -86,6 +87,7 @@ function App() {
         <Route path="/meeting" element={<MeetingRoom />} />
         <Route path="/join-batch/:batchId" element={<BatchJoinRedirect />} />
         <Route path="/users/login" element={<UserLogin />} />
+        <Route path="/users/login-otp" element={<UserOtpLogin />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         {/* Public Route */}
